@@ -1,0 +1,57 @@
+{% load static %}
+<!-- ========== FOOTER ========== -->
+<footer class="footer-premium">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-md-5">
+                <h3 class="gold-accent">{{ footer.company_name }}</h3>
+                <p class="text-white-50">
+                    <span data-en="{{ footer.registration_en }}" data-sw="{{ footer.registration_sw }}">{{ footer.registration_en }}</span>
+                </p>
+                <p><i class="bi bi-geo-alt gold-accent me-2"></i>
+                    <span data-en="{{ footer.address_en }}" data-sw="{{ footer.address_sw }}">{{ footer.address_en }}</span>
+                </p>
+                <p><i class="bi bi-telephone gold-accent me-2"></i> {{ contact_info.phone }} (WhatsApp/SMS/Voice)</p>
+                <p><i class="bi bi-envelope gold-accent me-2"></i> {{ contact_info.email }}</p>
+                <div class="d-flex gap-3 mt-3">
+                    {% for social in social_links %}
+                        <a href="{{ social.url }}" target="_blank" class="text-white-50 fs-4">
+                            <i class="bi {{ social.icon }}"></i>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="row">
+                    <div class="col-6">
+                        <h6 class="gold-accent" data-en="Quick Links" data-sw="Viungo vya Haraka">Quick Links</h6>
+                        <ul class="list-unstyled">
+                            <li><a href="#about" class="text-white-50 text-decoration-none" data-en="About Us" data-sw="Kuhusu Sisi">About Us</a></li>
+                            <li><a href="#services" class="text-white-50 text-decoration-none" data-en="Our Services" data-sw="Huduma Zetu">Our Services</a></li>
+                            <li><a href="#branches" class="text-white-50 text-decoration-none" data-en="Branches" data-sw="Matawi">Branches</a></li>
+                            <li><a href="#faq" class="text-white-50 text-decoration-none" data-en="FAQs" data-sw="Maswali">FAQs</a></li>
+                            <li><a href="#contact" class="text-white-50 text-decoration-none" data-en="Contact" data-sw="Mawasiliano">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="gold-accent" data-en="Contact Info" data-sw="Maelezo ya Mawasiliano">Contact Info</h6>
+                        <ul class="list-unstyled">
+                            <li class="text-white-50" data-en="Working Hours:" data-sw="Saa za Kazi:">Working Hours:</li>
+                            <li class="text-white-50">
+                                <span data-en="{{ contact_info.working_hours_en }}" data-sw="{{ contact_info.working_hours_sw }}">{{ contact_info.working_hours_en }}</span>
+                            </li>
+                            <li class="text-white-50 mt-2">
+                                <i class="bi bi-exclamation-circle gold-accent me-1"></i> 
+                                <span data-en="Complaints:" data-sw="Malalamiko:">Complaints:</span> {{ contact_info.email }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="border-white-20 my-4">
+        <div class="text-center text-white-50 small">
+            {{ footer.copyright_text }} · <span data-en="All rights reserved" data-sw="Haki zote zimehifadhiwa">All rights reserved</span> · ENGLISH / SWAHILI
+        </div>
+    </div>
+</footer>

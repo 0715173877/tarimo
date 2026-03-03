@@ -1,0 +1,407 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- ========== HERO SECTION ========== -->
+<section id="home" style="scroll-margin-top: 80px;">
+    <div class="row min-vh-80 py-5 align-items-center">
+        <div class="col-lg-8" data-aos="fade-right" data-aos-duration="1000">
+            <div class="mb-4">
+                <span class="info-pill">
+                    <i class="bi bi-shield-check"></i> 
+                    <span data-en="{{ hero.tagline_en }}" data-sw="{{ hero.tagline_sw }}">{{ hero.tagline_en }}</span>
+                </span>
+                <span class="info-pill ms-2">
+                    <i class="bi bi-building"></i> 
+                    <span data-en="{{ hero.registration_text_en }}" data-sw="{{ hero.registration_text_sw }}">{{ hero.registration_text_en }}</span>
+                </span>
+            </div>
+            <h1 class="display-premium">
+                <span data-en="{{ hero.heading_en|linebreaksbr }}" data-sw="{{ hero.heading_sw|linebreaksbr }}">{{ hero.heading_en|linebreaksbr }}</span>
+            </h1>
+            <p class="subhead-premium my-4">
+                <span data-en="{{ hero.subheading_en }}" data-sw="{{ hero.subheading_sw }}">{{ hero.subheading_en }}</span>
+            </p>
+            
+            <!-- Contact info -->
+            <div class="glass-card p-4 mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2"><i class="bi bi-telephone-fill gold-accent me-2"></i> {{ contact_info.phone }}</p>
+                        <p class="mb-2"><i class="bi bi-whatsapp gold-accent me-2"></i> {{ contact_info.whatsapp }}</p>
+                        <p class="mb-0"><i class="bi bi-envelope-fill gold-accent me-2"></i> {{ contact_info.email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="branch-badge mb-2">
+                            <i class="bi bi-building"></i> 
+                            <span data-en="Main Branch: Victoria Complex" data-sw="Tawi Kuu: Victoria Complex">Main Branch: Victoria Complex</span>
+                        </div>
+                        <p class="mb-0 text-warning">
+                            <i class="bi bi-clock"></i> 
+                            <span data-en="{{ contact_info.working_hours_en }}" data-sw="{{ contact_info.working_hours_sw }}">{{ contact_info.working_hours_en }}</span>
+                        </p>
+                        <small class="text-white-50">
+                            <span data-en="{{ contact_info.notice_en }}" data-sw="{{ contact_info.notice_sw }}">{{ contact_info.notice_en }}</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CTA group -->
+            <div class="d-flex flex-wrap gap-3 my-5">
+                <a href="tel:{{ contact_info.phone }}" class="btn btn-gold btn-lg px-5 py-3">
+                    <i class="bi bi-telephone-fill me-2"></i><span data-en="Call Us" data-sw="Piga Simu">Call Us</span>
+                </a>
+                <a href="https://wa.me/{{ contact_info.whatsapp|cut:'+' }}" target="_blank" class="btn btn-outline-gold btn-lg px-5 py-3">
+                    <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                </a>
+                <a href="#location" class="btn btn-outline-light btn-lg px-4 py-3">
+                    <i class="bi bi-geo-alt-fill me-2"></i><span data-en="Directions" data-sw="Njia">Directions</span>
+                </a>
+            </div>
+            
+            <!-- stats -->
+            <div class="row g-3 mt-4">
+                <div class="col-4">
+                    <div class="stat-box">
+                        <div class="stat-number">{{ partner_banks|length }}+</div>
+                        <div class="small text-white-50" data-en="Partner Banks" data-sw="Benki Washirika">Partner Banks</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-box">
+                        <div class="stat-number">{{ mobile_operators|length }}+</div>
+                        <div class="small text-white-50" data-en="Mobile Networks" data-sw="Mitandao ya Simu">Mobile Networks</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-box">
+                        <div class="stat-number" data-en="Global" data-sw="Kimataifa">Global</div>
+                        <div class="small text-white-50" data-en="Money Transfers" data-sw="Uhamisho Fedha">Money Transfers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 d-none d-lg-block" data-aos="fade-left">
+            <div class="glass-card p-5 text-center">
+                <i class="bi bi-bank2" style="font-size: 6rem; color: #f5b342;"></i>
+                <h4 class="gold-accent mt-4" data-en="Est. 2022" data-sw="Ilianzishwa 2022">Est. 2022</h4>
+                <p class="text-white-50" data-en="Registered 17th May 2022" data-sw="Imejiandikisha 17 Mei 2022">Registered 17th May 2022</p>
+                <div class="gold-border mt-4">
+                    <p class="mb-0 text-start text-white" data-en='"Your trusted mobile money and banking agent"' data-sw='"Wakala wako wa pesa kwa simu na benki anayeaminika"'>"Your trusted mobile money and banking agent"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== VISION, MISSION, CORE VALUES ========== -->
+<section id="about" style="scroll-margin-top: 80px;">
+    <div class="row g-4 my-5">
+        {% for section in about_sections %}
+        <div class="col-md-4" data-aos="fade-up" {% if not forloop.first %}data-aos-delay="{{ forloop.counter|add:'100' }}"{% endif %}>
+            <div class="glass-card p-4 h-100">
+                <i class="bi {{ section.icon }} fs-1 gold-accent mb-3"></i>
+                <h4 class="gold-accent">
+                    <span data-en="{{ section.title_en }}" data-sw="{{ section.title_sw }}">{{ section.title_en }}</span>
+                </h4>
+                <p class="text-white-50">
+                    <span data-en="{{ section.content_en }}" data-sw="{{ section.content_sw }}">{{ section.content_en }}</span>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ========== CAROUSEL SLIDES ========== -->
+<section id="services" style="scroll-margin-top: 80px;">
+    <div class="my-5" data-aos="fade-up">
+        <h2 class="display-6 fw-bold mb-4 gold-border">
+            <span data-en="Our Services at a Glance" data-sw="Huduma Zetu kwa Mtupo wa Jicho">Our Services at a Glance</span>
+        </h2>
+        
+        <div id="serviceCarousel" class="carousel slide carousel-premium" data-bs-ride="carousel">
+            <div class="carousel-indicators carousel-indicators-custom">
+                {% for slide in carousel_slides %}
+                <button type="button" data-bs-target="#serviceCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></button>
+                {% endfor %}
+            </div>
+            <div class="carousel-inner">
+                {% for slide in carousel_slides %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    {% if slide.image %}
+                        <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.title_en }}" style="height:500px;object-fit:cover;">
+                    {% else %}
+                        <img src="{{ slide.image_url }}" class="d-block w-100" alt="{{ slide.title_en }}" style="height:500px;object-fit:cover;">
+                    {% endif %}
+                    <div class="carousel-caption carousel-caption-premium d-block">
+                        <h3 data-en="{{ slide.title_en }}" data-sw="{{ slide.title_sw }}">{{ slide.title_en }}</h3>
+                        <p data-en="{{ slide.description_en }}" data-sw="{{ slide.description_sw }}">{{ slide.description_en }}</p>
+                        <span class="badge bg-warning text-dark px-3 py-2" 
+                              data-en="{{ slide.badge_text_en }}" 
+                              data-sw="{{ slide.badge_text_sw }}">{{ slide.badge_text_en }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev carousel-control-custom" type="button" data-bs-target="#serviceCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next carousel-control-custom" type="button" data-bs-target="#serviceCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Swahili Block -->
+    <div class="swahili-block-premium my-5" data-aos="zoom-in">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 style="font-family:'Playfair Display';font-size:2.5rem;color:#f5b342;" 
+                    data-en="YOUR TRUSTED BANKING & MOBILE MONEY AGENT" 
+                    data-sw="WAKALA WAKO WA BENKI NA PESA KWA SIMU">
+                    YOUR TRUSTED BANKING & MOBILE MONEY AGENT
+                </h3>
+                <p class="fs-4 text-white-50 mb-0" 
+                   data-en="Banking, mobile money and international money transfers – Nzuguni, Dodoma" 
+                   data-sw="Huduma za kibenki, mitandao ya simu na uhamisho wa fedha kimataifa – Nzuguni, Dodoma">
+                    Banking, mobile money and international money transfers – Nzuguni, Dodoma
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="#contact" class="btn btn-outline-gold btn-lg">
+                    <i class="bi bi-whatsapp me-2"></i><span data-en="Contact Us" data-sw="Wasiliana Nasi">Contact Us</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Services Cards -->
+    <h2 class="display-6 fw-bold mb-4 gold-border" data-aos="fade-right">
+        <span data-en="Core Services" data-sw="Huduma za Msingi">Core Services</span>
+    </h2>
+    <div class="row g-4 mb-5">
+        {% for service in core_services %}
+        <div class="col-md-6 col-lg-3" data-aos="flip-left" data-aos-delay="{{ forloop.counter|add:'100' }}">
+            <div class="glass-card p-4 text-center h-100">
+                <i class="bi {{ service.icon }} fs-1 gold-accent mb-3"></i>
+                <h5 class="fw-bold">
+                    <span data-en="{{ service.title_en }}" data-sw="{{ service.title_sw }}">{{ service.title_en }}</span>
+                </h5>
+                <p class="text-white-50 small">
+                    <span data-en="{{ service.description_en }}" data-sw="{{ service.description_sw }}">{{ service.description_en }}</span>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ========== LOCATION SECTION ========== -->
+<section id="location" style="scroll-margin-top: 80px;">
+    {% with location=branches.first.location_details %}
+    {% if location %}
+    <div class="row g-4 my-5" data-aos="fade-up">
+        <div class="col-12">
+            <div class="glass-card p-5 location-highlight">
+                <h2 class="display-6 fw-bold mb-4">
+                    <span class="gold-border">
+                        <span data-en="Find Us at Victoria Complex Building" data-sw="Tupate Jengo la Victoria Complex">Find Us at Victoria Complex Building</span>
+                    </span>
+                </h2>
+                
+                <div class="row">
+                    <div class="col-lg-5 mb-4 mb-lg-0">
+                        <div class="address-card">
+                            <div class="d-flex align-items-center mb-4">
+                                <i class="bi bi-building fs-1 gold-accent me-3"></i>
+                                <h3 class="gold-accent mb-0">
+                                    Victoria Complex<br>
+                                    <small class="fs-6 text-white-50" data-en="Main Branch · Headquarters" data-sw="Tawi Kuu · Makao Makuu">Main Branch · Headquarters</small>
+                                </h3>
+                            </div>
+                            
+                            <div class="mb-4 p-3" style="background:rgba(245,180,66,0.1);border-radius:1rem;">
+                                <p class="fs-5 mb-2">
+                                    <i class="bi bi-geo-alt-fill gold-accent me-2"></i> 
+                                    <strong class="text-white" data-en="Street Address:" data-sw="Anwani ya Mtaa:">Street Address:</strong>
+                                </p>
+                                <p class="text-white-50 ps-4 fs-5">
+                                    <span data-en="{{ location.street_address_en }}" data-sw="{{ location.street_address_sw }}">{{ location.street_address_en }}</span>
+                                </p>
+                            </div>
+                            
+                            <div class="glass-card p-3 mt-4" style="border-left:3px solid #f5b342;">
+                                <p class="mb-0">
+                                    <i class="bi bi-signpost-split gold-accent me-2 fs-5"></i>
+                                    <strong data-en="Nearby Landmark:" data-sw="Alama ya Jirani:">Nearby Landmark:</strong> 
+                                    <span data-en="{{ location.landmark_en }}" data-sw="{{ location.landmark_sw }}">{{ location.landmark_en }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-7">
+                        <div class="map-container">
+                            <iframe src="{{ location.google_maps_embed_url }}" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                        
+                        <div class="row g-2 mt-3">
+                            <div class="col-6">
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=Victoria+Complex+Nzuguni+Dodoma" target="_blank" class="btn btn-gold w-100 py-3">
+                                    <i class="bi bi-compass me-2"></i><span data-en="Get Directions" data-sw="Pata Njia">Get Directions</span>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="https://www.google.com/maps/search/?api=1&query=Victoria+Complex+Nzuguni+Dodoma" target="_blank" class="btn btn-outline-gold w-100 py-3">
+                                    <i class="bi bi-pin-map-fill me-2"></i><span data-en="View on Google Maps" data-sw="Tazama kwenye Google Maps">View on Google Maps</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+</section>
+
+<!-- ========== PARTNER BANKS & OPERATORS ========== -->
+<div class="glass-card p-5 my-5" data-aos="fade-up">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h3 class="fw-bold gold-accent">
+                <i class="bi bi-building me-2"></i>
+                <span data-en="Our Partners & Sponsors" data-sw="Washirika na Wadhamini Wetu">Our Partners & Sponsors</span>
+            </h3>
+        </div>
+        <div class="col-auto">
+            <span class="badge bg-warning bg-opacity-25 text-warning p-3" 
+                  data-en="{{ partner_banks|length }}+ Banking Partners" 
+                  data-sw="Washirika wa Benki {{ partner_banks|length }}+">{{ partner_banks|length }}+ Banking Partners</span>
+        </div>
+    </div>
+    
+    <!-- Partner Banks -->
+    <h5 class="gold-accent mt-4 mb-3" data-en="Partner Banks" data-sw="Benki Washirika">Partner Banks</h5>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+        {% for bank in partner_banks %}
+            <span class="info-pill">{{ bank.name }}</span>
+        {% endfor %}
+    </div>
+    
+    <!-- Mobile Money Operators -->
+    <h5 class="gold-accent mt-4 mb-3" data-en="Mobile Money Operators" data-sw="Watoa Huduma wa Pesa kwa Simu">Mobile Money Operators</h5>
+    <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+        {% for op in mobile_operators %}
+            <span class="info-pill" style="background:#f5b34220;">{{ op.name }}</span>
+        {% endfor %}
+    </div>
+    
+    <!-- International Money Transfers -->
+    <h5 class="gold-accent mt-4 mb-3" data-en="International Money Transfers" data-sw="Uhamisho Fedha Kimataifa">International Money Transfers</h5>
+    <div class="d-flex flex-wrap gap-2 justify-content-center">
+        {% for partner in transfer_partners %}
+            <span class="partner-logo-pill" style="background:#f5b342;">{{ partner.name }}</span>
+        {% endfor %}
+    </div>
+    <p class="text-center text-white-50 mt-3" 
+       data-en="Send and receive money to and from anywhere in the World" 
+       data-sw="Tuma na pokea pesa popote duniani">Send and receive money to and from anywhere in the World</p>
+</div>
+
+<!-- ========== FAQ SECTION ========== -->
+<section id="faq" style="scroll-margin-top: 80px;">
+    <div class="my-5" data-aos="fade-up">
+        <h2 class="display-6 fw-bold mb-4 gold-border">
+            <span data-en="Frequently Asked Questions" data-sw="Maswali Yanayoulizwa Mara kwa Mara">Frequently Asked Questions</span>
+        </h2>
+        <div class="accordion" id="faqAccordion">
+            {% for faq in faqs %}
+            <div class="accordion-item bg-transparent border-0 mb-3">
+                <h2 class="accordion-header">
+                    <button class="accordion-button bg-transparent text-white gold-accent {% if not forloop.first %}collapsed{% endif %}" 
+                            type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.counter }}">
+                        <span data-en="{{ faq.question_en }}" data-sw="{{ faq.question_sw }}">{{ faq.question_en }}</span>
+                    </button>
+                </h2>
+                <div id="faq{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-white-50">
+                        <span data-en="{{ faq.answer_en }}" data-sw="{{ faq.answer_sw }}">{{ faq.answer_en }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ========== BRANCHES SECTION ========== -->
+<section id="branches" style="scroll-margin-top: 80px;">
+    <div class="my-5" data-aos="fade-up">
+        <h2 class="display-6 fw-bold mb-4 gold-border">
+            <span data-en="Our Branches" data-sw="Matawi Yetu">Our Branches</span>
+        </h2>
+        <div class="row g-4">
+            {% for branch in branches %}
+            <div class="col-md-6">
+                <div class="glass-card p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-building fs-1 gold-accent me-3"></i>
+                        <div>
+                            <h4 class="mb-0">
+                                <span data-en="{{ branch.name_en }}" data-sw="{{ branch.name_sw }}">{{ branch.name_en }}</span>
+                            </h4>
+                            <p class="text-white-50 mb-0">
+                                {% if branch.is_coming_soon %}
+                                    <span data-en="Opening Soon" data-sw="Inafunguliwa Hivi Karibuni">Opening Soon</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <p><i class="bi bi-geo-alt gold-accent me-2"></i> 
+                        <span data-en="{{ branch.address_en }}" data-sw="{{ branch.address_sw }}">{{ branch.address_en }}</span>
+                    </p>
+                    {% if branch.postal_box %}
+                        <p><i class="bi bi-envelope gold-accent me-2"></i> {{ branch.postal_box }}</p>
+                    {% endif %}
+                    {% if branch.phone %}
+                        <p><i class="bi bi-telephone gold-accent me-2"></i> {{ branch.phone }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ========== CONTACT SECTION ========== -->
+<section id="contact" style="scroll-margin-top: 80px;">
+    <div class="glass-card p-4 my-5 text-center" data-aos="fade-up">
+        <i class="bi bi-envelope-paper fs-1 gold-accent"></i>
+        <h4 class="mt-2" data-en="Contact Information" data-sw="Maelezo ya Mawasiliano">Contact Information</h4>
+        <p class="text-white-50">{{ contact_info.email }} | {{ contact_info.phone }}</p>
+        <p class="text-white-50" data-en="We respond within 24 hours" data-sw="Tunajibu ndani ya saa 24">We respond within 24 hours</p>
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            {% for social in social_links %}
+                <a href="{{ social.url }}" target="_blank" class="btn btn-outline-gold">
+                    <i class="bi {{ social.icon }}"></i> {{ social.get_platform_display }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ========== VISITOR COUNTER ========== -->
+<div class="glass-card p-4 my-5 text-center" data-aos="fade-up">
+    <i class="bi bi-people fs-1 gold-accent"></i>
+    <h4 class="mt-2" data-en="Website Visitors" data-sw="Wageni wa Tovuti">Website Visitors</h4>
+    <div class="stat-number mt-2">{{ visitor_counter.count }}</div>
+    <small class="text-white-50">
+        <span data-en="{{ visitor_counter.text_en }}" data-sw="{{ visitor_counter.text_sw }}">{{ visitor_counter.text_en }}</span>
+    </small>
+</div>
+{% endblock %}

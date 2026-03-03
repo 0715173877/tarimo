@@ -1,0 +1,42 @@
+{% load static %}
+<!-- ========== NAVBAR ========== -->
+<nav class="navbar navbar-expand-lg navbar-premium sticky-top">
+    <div class="container">
+        <a class="navbar-brand kalton-logo" href="{% url 'website:home' %}">
+            {% if site_settings and site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" width="60" height="60" alt="Kalton Investment Logo">
+            {% else %}
+                <img src="{% static 'website/images/K I.png' %}" width="60" height="60" alt="Kalton Investment Logo">
+            {% endif %}
+            <div class="logo-text">
+                KalTon<br>
+                <span data-en="INVESTMENT" data-sw="UWEKEZAJI">INVESTMENT</span>
+            </div>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navPremium">
+            <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navPremium">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link nav-link-custom" href="#home" data-en="Home" data-sw="Nyumbani">Home</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-custom" href="#about" data-en="About" data-sw="Kuhusu">About</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-custom" href="#services" data-en="Services" data-sw="Huduma">Services</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-custom" href="#branches" data-en="Branches" data-sw="Matawi">Branches</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-custom" href="#contact" data-en="Contact" data-sw="Mawasiliano">Contact</a></li>
+                <li class="nav-item ms-3">
+                    <!-- Two-button language switcher -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-gold btn-sm lang-switch" data-lang="en">ENGLISH</button>
+                        <button class="btn btn-outline-gold btn-sm lang-switch" data-lang="sw">SWAHILI</button>
+                    </div>
+                </li>
+                <li class="nav-item ms-3">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search..." data-en="Search..." data-sw="Tafuta...">
+                        <i class="bi bi-search"></i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

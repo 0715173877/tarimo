@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalton Investment · Complete Admin Panel</title>
+  <!-- Bootstrap 5.3 + icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f7fc;
+      color: #1e293b;
+    }
+    .admin-sidebar {
+      background: linear-gradient(180deg, #0b1423 0%, #1a2942 100%);
+      min-height: 100vh;
+      color: #eef4ff;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .admin-sidebar .nav-link {
+      color: #b0c8e5;
+      padding: 0.8rem 1.5rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .admin-sidebar .nav-link:hover, .admin-sidebar .nav-link.active {
+      background: rgba(245, 180, 66, 0.15);
+      color: #f5b342;
+      border-left: 4px solid #f5b342;
+    }
+    .admin-sidebar .nav-link i { width: 24px; font-size: 1.2rem; }
+    .admin-header {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      border: 1px solid #e9eef2;
+      transition: all 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(245, 180, 66, 0.1);
+      border-color: #f5b34240;
+    }
+    .stat-icon {
+      width: 48px; height: 48px;
+      background: rgba(245, 180, 66, 0.1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: #f5b342;
+    }
+    .btn-gold {
+      background: #f5b342;
+      color: #0b1423;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      padding: 0.5rem 1.5rem;
+    }
+    .btn-gold:hover {
+      background: #ffc55a;
+      color: #0b1423;
+    }
+    .btn-outline-gold {
+      border: 2px solid #f5b342;
+      color: #f5b342;
+      border-radius: 50px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+    }
+    .btn-outline-gold:hover {
+      background: #f5b342;
+      color: #0b1423;
+    }
+    .table-custom {
+      background: white;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+    }
+    .table-custom thead {
+      background: #f8fafd;
+      border-bottom: 2px solid #f5b34240;
+    }
+    .table-custom th {
+      padding: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .table-custom td {
+      padding: 1rem;
+      vertical-align: middle;
+      color: #475569;
+    }
+    .badge-status {
+      background: #22c55e20;
+      color: #22c55e;
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-weight: 500;
+    }
+    .badge-draft {
+      background: #f5b34220;
+      color: #f5b342;
+    }
+    .section-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      border: 1px solid #e9eef2;
+    }
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-left: 4px solid #f5b342;
+      padding-left: 1rem;
+    }
+    .preview-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid #f5b34240;
+    }
+    .footer-links a {
+      color: #64748b;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: #f5b342; }
+    .nav-pills .nav-link {
+      border-radius: 50px;
+      color: #475569;
+    }
+    .nav-pills .nav-link.active {
+      background: #f5b342;
+      color: #0b1423;
+    }
+    .accordion-button:not(.collapsed) {
+      background: rgba(245, 180, 66, 0.1);
+      color: #f5b342;
+    }
+    .accordion-button:focus {
+      box-shadow: none;
+      border-color: #f5b34240;
+    }
+    /* List view enhancements */
+    .list-group-item {
+      background: #f8fafd;
+      border: 1px solid #e9eef2;
+      border-radius: 1rem !important;
+      margin-bottom: 0.5rem;
+    }
+    .list-group-item:hover {
+      border-color: #f5b34240;
+      background: white;
+    }
+    .drag-handle {
+      cursor: grab;
+      color: #94a3b8;
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .inline-edit {
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 0.3rem 0.5rem;
+    }
+    .inline-edit:hover {
+      border-color: #f5b342;
+      background: #fff9e6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid p-0">
+    <div class="row g-0">
+      <!-- SIDEBAR - COMPLETE NAVIGATION -->
+      <div class="col-lg-2 col-md-3 admin-sidebar p-0">
+        <div class="p-4">
+          <div class="d-flex align-items-center gap-2 mb-5">
+            <img src="../logo/fwdkaltonlogofiles/K I.png" width="40" height="40" alt="Kalton">
+            <span style="font-family: 'Playfair Display'; font-size: 1.4rem; color: #f5b342;">KalTon<br><small class="text-white fs-6 fw-light">ADMIN</small></span>
+          </div>
+          <nav class="nav flex-column">
+            <a class="nav-link active" href="#dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            
+            <!-- Website Sections Group -->
+            <div class="small text-white-50 mt-3 mb-1 px-3">MAIN SECTIONS</div>
+            <a class="nav-link" href="#hero"><i class="bi bi-house-door me-2"></i>Home</a>
+            <a class="nav-link" href="#about"><i class="bi bi-eye me-2"></i>About</a>
+            <a class="nav-link" href="#core-services-list"><i class="bi bi-grid me-2"></i>Core Services</a>
+            <a class="nav-link" href="#location"><i class="bi bi-geo-alt me-2"></i>Location & Address</a>
+            <a class="nav-link" href="#contact"><i class="bi bi-envelope me-2"></i>Contact Information</a>
+            <a class="nav-link" href="#branches-list"><i class="bi bi-building me-2"></i>Branches</a>
+            <a class="nav-link" href="#faq"><i class="bi bi-question-circle me-2"></i>FAQ</a>
+            
+            <div class="small text-white-50 mt-3 mb-1 px-3">CONTENT</div>
+            <a class="nav-link" href="#carousel"><i class="bi bi-images me-2"></i>Carousel Slides</a>
+            <a class="nav-link" href="#partners"><i class="bi bi-building me-2"></i>Partner Banks</a>
+            <a class="nav-link" href="#mobile"><i class="bi bi-phone me-2"></i>Mobile Operators</a>
+            <a class="nav-link" href="#transfers"><i class="bi bi-send me-2"></i>Money Transfers</a>
+            
+            <div class="small text-white-50 mt-3 mb-1 px-3">SETTINGS</div>
+            <a class="nav-link" href="#translations"><i class="bi bi-translate me-2"></i>Translations</a>
+            <a class="nav-link" href="#visitors"><i class="bi bi-people me-2"></i>Visitor Counter</a>
+            <a class="nav-link" href="#footer"><i class="bi bi-layout-text-window me-2"></i>Footer</a>
+            <!-- <a class="nav-link" href="#settings"><i class="bi bi-gear me-2"></i>Settings</a> -->
+          </nav>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="col-lg-10 col-md-9">
+        <div class="admin-header">
+          <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="mb-0 fw-semibold"><i class="bi bi-grid-fill me-2 gold-accent"></i> Complete Admin Control</h4>
+              <div class="d-flex align-items-center gap-3">
+                <span class="text-muted"><i class="bi bi-calendar3 me-1"></i> March 2026</span>
+                <div class="dropdown">
+                  <button class="btn btn-outline-gold btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle me-1"></i> Admin
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'website:admin_logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    <li><a class="dropdown-item" href="{% url 'website:home' %}" target="_blank"><i class="bi bi-eye me-2"></i>View Site</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container-fluid px-4" id="dashboard">
+          <!-- STAT CARDS - COMPLETE OVERVIEW -->
+          <div class="row g-4 mb-5">
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-bank2"></i></div>
+                <div><small class="text-muted">Partner Banks</small><h3 class="mb-0 fw-bold">20</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-phone"></i></div>
+                <div><small class="text-muted">Mobile Networks</small><h3 class="mb-0 fw-bold">6</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-send"></i></div>
+                <div><small class="text-muted">Transfer Partners</small><h3 class="mb-0 fw-bold">2</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-building"></i></div>
+                <div><small class="text-muted">Branches</small><h3 class="mb-0 fw-bold">2</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-question-circle"></i></div>
+                <div><small class="text-muted">FAQ Items</small><h3 class="mb-0 fw-bold">4</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-images"></i></div>
+                <div><small class="text-muted">Carousel Slides</small><h3 class="mb-0 fw-bold">3</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+                <div><small class="text-muted">Languages</small><h3 class="mb-0 fw-bold">2</h3></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card d-flex align-items-center">
+                <div class="stat-icon me-3"><i class="bi bi-people"></i></div>
+                <div><small class="text-muted">Visitors</small><h3 class="mb-0 fw-bold">1,234</h3></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HERO SECTION (HOME) -->
+          <section id="hero" class="section-card">
+            <h4 class="section-title"><i class="bi bi-house-door gold-accent"></i> Hero / Home Section</h4>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tagline (EN)</label>
+                <input type="text" class="form-control" value="Trusted Banking & Mobile Money Agent · Est. 2022">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tagline (SW)</label>
+                <input type="text" class="form-control" value="Wakala wa Benki na Pesa kwa Simu · Ilianzishwa 2022">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Main Heading (EN)</label>
+                <input type="text" class="form-control" value="Your Trusted Mobile Money & Banking Agent">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Main Heading (SW)</label>
+                <input type="text" class="form-control" value="Wakala Wako wa Pesa kwa Simu na Benki Anayeaminika">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Subheading (EN)</label>
+                <textarea class="form-control" rows="2">Fast, secure & reliable financial services in Dodoma. Banking, mobile money & international money transfers under one roof.</textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Subheading (SW)</label>
+                <textarea class="form-control" rows="2">Huduma za kifedha za haraka, salama na za kuaminika Dodoma. Benki, pesa kwa simu na uhamisho wa fedha kimataifa chini ya paa moja.</textarea>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Update Hero Section</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ABOUT SECTION (VISION, MISSION, VALUES) -->
+          <section id="about" class="section-card">
+            <h4 class="section-title"><i class="bi bi-eye gold-accent"></i> About (Vision, Mission, Core Values)</h4>
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="border p-3 rounded-4">
+                  <h5 class="gold-accent"><i class="bi bi-eye"></i> Vision</h5>
+                  <label class="form-label mt-2">English</label>
+                  <textarea class="form-control mb-2" rows="3">To be the most trusted and accessible financial services provider in Dodoma region, bridging the gap between traditional banking and mobile money.</textarea>
+                  <label class="form-label">Swahili</label>
+                  <textarea class="form-control" rows="3">Kuwa mtoa huduma wa kifedha anayeaminika na anayepatikana kwa urahisi katika mkoa wa Dodoma, kuunganisha benki za jadi na pesa kwa simu.</textarea>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="border p-3 rounded-4">
+                  <h5 class="gold-accent"><i class="bi bi-bullseye"></i> Mission</h5>
+                  <label class="form-label mt-2">English</label>
+                  <textarea class="form-control mb-2" rows="3">To provide fast, reliable, and secure financial services to our community through innovative solutions and exceptional customer service.</textarea>
+                  <label class="form-label">Swahili</label>
+                  <textarea class="form-control" rows="3">Kutoa huduma za kifedha za haraka, za kuaminika na salama kwa jamii yetu kupitia suluhisho bunifu na huduma bora kwa wateja.</textarea>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="border p-3 rounded-4">
+                  <h5 class="gold-accent"><i class="bi bi-gem"></i> Core Values</h5>
+                  <label class="form-label mt-2">English</label>
+                  <textarea class="form-control mb-2" rows="3">Trust, Integrity, Accessibility, Innovation, and Customer-Centric Service in everything we do.</textarea>
+                  <label class="form-label">Swahili</label>
+                  <textarea class="form-control" rows="3">Uaminifu, Uadilifu, Upatikanaji, Ubunifu, na Huduma inayomlenga Mteja katika kila tunachofanya.</textarea>
+                </div>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Update About Section</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== CORE SERVICES AS SORTABLE LIST (UPDATED) ===== -->
+          <section id="core-services-list" class="section-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="section-title mb-0"><i class="bi bi-grid gold-accent"></i> Core Services (List View)</h4>
+              <button class="btn btn-gold btn-sm"><i class="bi bi-plus-circle me-1"></i> Add New Service</button>
+            </div>
+            <div class="table-custom table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr><th style="width: 40px;">#</th><th>Icon</th><th>Title (EN)</th><th>Title (SW)</th><th>Description Preview</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                    <td><i class="bi bi-bank2 fs-4 gold-accent"></i></td>
+                    <td class="inline-edit" contenteditable="true">Banking Agency</td>
+                    <td class="inline-edit" contenteditable="true">Uwakala wa Benki</td>
+                    <td><small>CRDB, NMB, NBC, Equity, TCB, Akiba, Mkombozi, Amana, Mwanga Hakika, Mwalimu & more</small></td>
+                    <td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                    <td><i class="bi bi-phone fs-4 gold-accent"></i></td>
+                    <td class="inline-edit" contenteditable="true">Mobile Money</td>
+                    <td class="inline-edit" contenteditable="true">Pesa kwa Simu</td>
+                    <td><small>Airtel, M-Pesa, Mixx by Yas, Halo Pesa, T-Pesa, Selcom</small></td>
+                    <td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                    <td><i class="bi bi-send fs-4 gold-accent"></i></td>
+                    <td class="inline-edit" contenteditable="true">International Money Transfers</td>
+                    <td class="inline-edit" contenteditable="true">Uhamisho Fedha Kimataifa</td>
+                    <td><small>Western Union · MoneyGram Send & receive worldwide</small></td>
+                    <td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                    <td><i class="bi bi-clock fs-4 gold-accent"></i></td>
+                    <td class="inline-edit" contenteditable="true">Working Hours</td>
+                    <td class="inline-edit" contenteditable="true">Saa za Kazi</td>
+                    <td><small>Mon-Sat 8:00–20:00 Sun 8:30–20:00</small></td>
+                    <td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-muted small mt-2"><i class="bi bi-info-circle me-1"></i> Drag the <i class="bi bi-grip-vertical"></i> handle to reorder. Click text to edit inline.</p>
+          </section>
+
+          <!-- LOCATION & ADDRESS (FULL) - RESTORED -->
+          <section id="location" class="section-card">
+            <h4 class="section-title"><i class="bi bi-geo-alt gold-accent"></i> Location & Address</h4>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <h5 class="gold-accent">Main Branch Details</h5>
+                <label class="form-label">Branch Name</label>
+                <input type="text" class="form-control mb-2" value="Victoria Complex">
+                <label class="form-label">Street Address (EN)</label>
+                <input type="text" class="form-control mb-2" value="Morogoro Road / Nzuguni Street, Nzuguni Area, Dodoma, Tanzania">
+                <label class="form-label">Street Address (SW)</label>
+                <input type="text" class="form-control mb-2" value="Morogoro Road / Nzuguni Street, Nzuguni Area, Dodoma, Tanzania">
+                <label class="form-label">Postal Address (EN)</label>
+                <input type="text" class="form-control mb-2" value="P. O. Box 4236, Dodoma, Tanzania">
+                <label class="form-label">Postal Address (SW)</label>
+                <input type="text" class="form-control mb-2" value="S. L. P 4236, Dodoma, Tanzania">
+              </div>
+              <div class="col-md-6">
+                <h5 class="gold-accent">Additional Info</h5>
+                <label class="form-label">Nearby Landmark (EN)</label>
+                <textarea class="form-control mb-2" rows="2">Located in the heart of Nzuguni Area, easily accessible from Morogoro Road. Look for Victoria Complex Building.</textarea>
+                <label class="form-label">Nearby Landmark (SW)</label>
+                <textarea class="form-control mb-2" rows="2">Iko katikati ya Nzuguni, inapatikana kwa urahisi kutoka Morogoro Road. Tafuta Jengo la Victoria Complex.</textarea>
+                <label class="form-label">Google Maps Embed URL</label>
+                <input type="text" class="form-control" value="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15839.123456789012!2d35.738726!3d-6.163315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x184c4e5d5e5b5b5b%3A0x5b5b5b5b5b5b5b5b!2sVictoria%20Complex%2C%20Nzuguni%2C%20Dodoma!5e0!3m2!1sen!2stz!4v1647884567890!5m2!1sen!2stz">
+              </div>
+              <div class="col-12">
+                <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Update Location</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- CONTACT INFORMATION -->
+          <section id="contact" class="section-card">
+            <h4 class="section-title"><i class="bi bi-envelope gold-accent"></i> Contact Information</h4>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Phone Number</label>
+                <input type="text" class="form-control" value="+255 788 775 282">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">WhatsApp</label>
+                <input type="text" class="form-control" value="+255 788 775 282">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" value="agtarimo@gmail.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Working Hours (EN)</label>
+                <input type="text" class="form-control" value="Mon-Sat 8:00-20:00 | Sun 8:30-20:00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Working Hours (SW)</label>
+                <input type="text" class="form-control" value="Jumatatu-Jumamosi 8:00-20:00 | Jumapili 8:30-20:00">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Small Notice (EN)</label>
+                <input type="text" class="form-control" value="WhatsApp/SMS/Voice calls accepted during working hours only">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Small Notice (SW)</label>
+                <input type="text" class="form-control" value="WhatsApp/SMS/Simu hupokelewa wakati wa saa za kazi tu">
+              </div>
+              <div class="col-12">
+                <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Update Contact Info</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===== BRANCHES AS SORTABLE LIST (UPDATED) ===== -->
+          <section id="branches-list" class="section-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="section-title mb-0"><i class="bi bi-building gold-accent"></i> Branches (List View)</h4>
+              <button class="btn btn-gold btn-sm"><i class="bi bi-plus-circle me-1"></i> Add New Branch</button>
+            </div>
+            <div class="table-custom table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr><th style="width: 40px;">#</th><th>Name (EN)</th><th>Name (SW)</th><th>Address</th><th>P.O. Box</th><th>Phone</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                    <td class="inline-edit" contenteditable="true">Main Branch</td>
+                    <td class="inline-edit" contenteditable="true">Tawi Kuu</td>
+                    <td class="inline-edit" contenteditable="true">Morogoro Road/Nzuguni Street, Nzuguni Area, Dodoma</td>
+                    <td>P.O. Box 4236 Dodoma</td>
+                    <td>+255 788 775 282</td>
+                    <td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td><i class="bi bi-grip-vertical drag-handle"></i></td>
+                    <td class="inline-edit" contenteditable="true">Coming Soon</td>
+                    <td class="inline-edit" contenteditable="true">Inakuja Karibuni</td>
+                    <td class="inline-edit" contenteditable="true">Additional branches opening in Dodoma</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-muted small mt-2"><i class="bi bi-info-circle me-1"></i> Drag the <i class="bi bi-grip-vertical"></i> handle to reorder. Click text to edit inline.</p>
+          </section>
+
+          <!-- FAQ SECTION -->
+          <section id="faq" class="section-card">
+            <h4 class="section-title"><i class="bi bi-question-circle gold-accent"></i> Frequently Asked Questions</h4>
+            <div class="accordion" id="faqAdmin">
+              <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">Q1: Working Hours</button></h2>
+                <div id="faq1" class="accordion-collapse collapse show">
+                  <div class="accordion-body">
+                    <label class="form-label">Question (EN)</label>
+                    <input type="text" class="form-control mb-2" value="What are your working hours?">
+                    <label class="form-label">Question (SW)</label>
+                    <input type="text" class="form-control mb-2" value="Saa zenu za kazi ni zipi?">
+                    <label class="form-label">Answer (EN)</label>
+                    <textarea class="form-control mb-2" rows="2">We are open Monday to Saturday from 8:00 AM to 8:00 PM, and Sunday from 8:30 AM to 8:00 PM. Our phone lines are available during working hours only.</textarea>
+                    <label class="form-label">Answer (SW)</label>
+                    <textarea class="form-control" rows="2">Tunafunguliwa Jumatatu hadi Jumamosi 8:00 asubuhi hadi 8:00 jioni, na Jumapili 8:30 hadi 8:00 jioni. Simu zetu zinapatikana wakati wa saa za kazi tu.</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">Q2: International Transfers</button></h2>
+                <div id="faq2" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <label class="form-label">Question (EN)</label>
+                    <input type="text" class="form-control mb-2" value="Can I send money internationally through Western Union?">
+                    <label class="form-label">Question (SW)</label>
+                    <input type="text" class="form-control mb-2" value="Naweza kutuma pesa kimataifa kupitia Western Union?">
+                    <label class="form-label">Answer (EN)</label>
+                    <textarea class="form-control mb-2" rows="2">Currently, customers can only receive money internationally. Soon we will offer both sending and receiving services.</textarea>
+                    <label class="form-label">Answer (SW)</label>
+                    <textarea class="form-control" rows="2">Kwa sasa, wateja wanaweza kupokea tu pesa kutoka nje. Hivi karibuni tutatoa huduma zote za kutuma na kupokea.</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">Q3: Location</button></h2>
+                <div id="faq3" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <label class="form-label">Question (EN)</label>
+                    <input type="text" class="form-control mb-2" value="Where exactly are you located in Dodoma?">
+                    <label class="form-label">Question (SW)</label>
+                    <input type="text" class="form-control mb-2" value="Mko wapi hasa Dodoma?">
+                    <label class="form-label">Answer (EN)</label>
+                    <textarea class="form-control mb-2" rows="2">We are located at Victoria Complex Building, along Morogoro Road/Nzuguni Street, Nzuguni Area, Dodoma. P.O. Box 4236.</textarea>
+                    <label class="form-label">Answer (SW)</label>
+                    <textarea class="form-control" rows="2">Tupo Jengo la Victoria Complex, kando ya Morogoro Road/Nzuguni Street katika eneo la Nzuguni, Dodoma. S. L. P ni 4236 Dodoma.</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">Q4: Complaints</button></h2>
+                <div id="faq4" class="accordion-collapse collapse">
+                  <div class="accordion-body">
+                    <label class="form-label">Question (EN)</label>
+                    <input type="text" class="form-control mb-2" value="How can I submit a complaint?">
+                    <label class="form-label">Question (SW)</label>
+                    <input type="text" class="form-control mb-2" value="Ninawezaje kuwasilisha malalamiko?">
+                    <label class="form-label">Answer (EN)</label>
+                    <textarea class="form-control mb-2" rows="2">Email agtarimo@gmail.com or call +255788775282 during working hours.</textarea>
+                    <label class="form-label">Answer (SW)</label>
+                    <textarea class="form-control" rows="2">Barua pepe agtarimo@gmail.com au piga simu +255788775282 wakati wa saa za kazi.</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Save All FAQ Changes</button>
+              <button class="btn btn-outline-gold ms-2"><i class="bi bi-plus-circle me-2"></i>Add New FAQ</button>
+            </div>
+          </section>
+
+          <!-- CAROUSEL SLIDES -->
+          <section id="carousel" class="section-card">
+            <h4 class="section-title"><i class="bi bi-images gold-accent"></i> Carousel Slides</h4>
+            <div class="table-custom table-responsive">
+              <table class="table table-hover">
+                <thead><tr><th>Preview</th><th>Title (EN)</th><th>Title (SW)</th><th>Badge</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr><td><img src="slide/slide two.png" class="preview-img"></td><td>Banking Agency Services</td><td>Huduma za Uwakala wa Benki</td><td><span class="badge bg-warning text-dark">20+ partner banks</span></td><td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td></tr>
+                  <tr><td><img src="slide/slide three.jpeg" class="preview-img"></td><td>Mobile Money Services</td><td>Huduma za Pesa kwa Simu</td><td><span class="badge bg-warning text-dark">TZS only</span></td><td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td></tr>
+                  <tr><td><img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=150" class="preview-img"></td><td>International Money Transfers</td><td>Uhamisho wa Fedha Kimataifa</td><td><span class="badge bg-warning text-dark">Receive & Send (soon)</span></td><td><button class="btn btn-sm btn-outline-gold me-1"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <button class="btn btn-gold mt-3"><i class="bi bi-plus-circle me-2"></i>Add New Slide</button>
+          </section>
+
+          <!-- PARTNERS & OPERATORS -->
+          <section id="partners" class="section-card">
+            <h4 class="section-title"><i class="bi bi-building gold-accent"></i> Partner Banks & Operators</h4>
+            <ul class="nav nav-pills mb-3" id="partnerTab">
+              <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#banks">Banks (20)</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#mobile">Mobile Money (6)</a></li>
+              <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#international">International (2)</a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane fade show active" id="banks">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <span class="info-pill border p-2 rounded-4">CRDB <i class="bi bi-x-circle-fill ms-2 text-danger" style="cursor:pointer;"></i></span>
+                  <span class="info-pill border p-2 rounded-4">NMB <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">NBC <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">Equity <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">TCB <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">Azania <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">PBZ <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                </div>
+                <button class="btn btn-outline-gold btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Bank</button>
+              </div>
+              <div class="tab-pane fade" id="mobile">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <span class="info-pill border p-2 rounded-4">Airtel Money <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">M-Pesa <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="info-pill border p-2 rounded-4">Mixx by Yas <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                </div>
+                <button class="btn btn-outline-gold btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Operator</button>
+              </div>
+              <div class="tab-pane fade" id="international">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <span class="partner-logo-pill border p-2 rounded-4">Western Union <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                  <span class="partner-logo-pill border p-2 rounded-4">MoneyGram <i class="bi bi-x-circle-fill ms-2 text-danger"></i></span>
+                </div>
+                <button class="btn btn-outline-gold btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Partner</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- VISITOR COUNTER -->
+          <section id="visitors" class="section-card">
+            <h4 class="section-title"><i class="bi bi-people gold-accent"></i> Visitor Counter</h4>
+            <div class="row align-items-center">
+              <div class="col-md-4">
+                <label class="form-label">Current Count</label>
+                <input type="number" class="form-control" value="1234">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Text (EN)</label>
+                <input type="text" class="form-control" value="and counting...">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Text (SW)</label>
+                <input type="text" class="form-control" value="na zinaendelea...">
+              </div>
+              <div class="col-12 mt-3">
+                <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Update Counter</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- FOOTER SECTION -->
+          <section id="footer" class="section-card">
+            <h4 class="section-title"><i class="bi bi-layout-text-window gold-accent"></i> Footer</h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Company Name</label>
+                <input type="text" class="form-control" value="KALTON INVESTMENT">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Registration (EN)</label>
+                <input type="text" class="form-control" value="Registered 17th May 2022 · P.O. Box 4236 Dodoma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Registration (SW)</label>
+                <input type="text" class="form-control" value="Imejiandikisha 17 Mei 2022 · S. L. P 4236 Dodoma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Address (EN)</label>
+                <input type="text" class="form-control" value="Victoria Complex Building, Morogoro Road/Nzuguni Street, Nzuguni Area, Dodoma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Address (SW)</label>
+                <input type="text" class="form-control" value="Jengo la Victoria Complex, Morogoro Road/Nzuguni Street, Nzuguni Area, Dodoma">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Copyright Text</label>
+                <input type="text" class="form-control" value="© 2024 Kalton Investment · All rights reserved">
+              </div>
+              <div class="col-12">
+                <button class="btn btn-gold"><i class="bi bi-save me-2"></i>Update Footer</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- TRANSLATIONS OVERVIEW -->
+          <section id="translations" class="section-card">
+            <h4 class="section-title"><i class="bi bi-translate gold-accent"></i> Language Translations</h4>
+            <p class="text-muted">All bilingual fields are managed within their respective sections above. This is a summary of language status.</p>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="border p-3 rounded-4">
+                  <h6 class="fw-bold"><i class="bi bi-check-circle-fill text-success me-2"></i>English (Primary)</h6>
+                  <p class="small text-muted mb-0">All content available in English</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="border p-3 rounded-4">
+                  <h6 class="fw-bold"><i class="bi bi-check-circle-fill text-success me-2"></i>Swahili (Secondary)</h6>
+                  <p class="small text-muted mb-0">All content available in Swahili</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="border-top mt-4 py-4 px-4 footer-links">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted small">© 2026 Kalton Investment Admin · Complete Control Panel v2.0</span>
+            <div>
+              <a href="#" class="me-3">Settings</a>
+              <a href="#" class="me-3">Logs</a>
+              <a href="#" target="_blank">View Site</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Sidebar active state
+    document.querySelectorAll('.admin-sidebar .nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        document.querySelectorAll('.admin-sidebar .nav-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
