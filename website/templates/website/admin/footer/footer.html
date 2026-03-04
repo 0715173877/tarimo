@@ -1,0 +1,545 @@
+<!-- website/templates/website/admin/footer/footer.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Footer Management - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Footer Content Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-building"></i></div>
+            <div>
+                <small class="text-muted">Company</small>
+                <h3 class="mb-0 fw-bold">{{ footer.company_name|truncatechars:15 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-calendar-check"></i></div>
+            <div>
+                <small class="text-muted">Established</small>
+                <h3 class="mb-0 fw-bold">{{ footer.registration_en|truncatechars:10 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-c-circle"></i></div>
+            <div>
+                <small class="text-muted">Copyright</small>
+                <h3 class="mb-0 fw-bold">{% now "Y" %}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+            <div>
+                <small class="text-muted">Languages</small>
+                <h3 class="mb-0 fw-bold">EN / SW</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN FOOTER FORM -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-layout-text-window gold-accent"></i> Footer Content
+        </h4>
+        <button type="submit" form="footerForm" class="btn btn-gold">
+            <i class="bi bi-save me-2"></i>Save Changes
+        </button>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="footerForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        <div class="alert {% if footer.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if footer.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Footer Status:</strong> 
+                {% if footer.is_active %}
+                    <span class="badge bg-success">Active</span> - Footer is visible on the website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Footer is hidden from the website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Last updated: {{ footer.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - Main Footer Fields -->
+            <div class="col-md-8">
+                <!-- Active Status and Order Fields from BaseModel -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                                    <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                                    <span id="activeStatusText">
+                                        {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                            {{ form.order }}
+                            {% if form.order.help_text %}
+                            <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company Name -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-building me-1 gold-accent"></i> Company Name <span class="text-danger">*</span>
+                    </label>
+                    {{ form.company_name }}
+                    {% if form.company_name.errors %}
+                        <div class="text-danger small mt-1">{{ form.company_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Registration Information (Bilingual) -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-calendar-check me-1 gold-accent"></i> Registration (English)
+                        </label>
+                        {{ form.registration_en }}
+                        {% if form.registration_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.registration_en.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">e.g., "Registered 17th May 2022"</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-calendar-check me-1 gold-accent"></i> Registration (Swahili)
+                        </label>
+                        {{ form.registration_sw }}
+                        {% if form.registration_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.registration_sw.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Mfano: "Imejiandikisha 17 Mei 2022"</div>
+                    </div>
+                </div>
+
+                <!-- Address Information (Bilingual) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-geo-alt me-1 gold-accent"></i> Address (English) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.address_en }}
+                    {% if form.address_en.errors %}
+                        <div class="text-danger small mt-1">{{ form.address_en.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-geo-alt me-1 gold-accent"></i> Address (Swahili) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.address_sw }}
+                    {% if form.address_sw.errors %}
+                        <div class="text-danger small mt-1">{{ form.address_sw.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Copyright Text -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-c-circle me-1 gold-accent"></i> Copyright Text <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-c-circle"></i></span>
+                        {{ form.copyright_text }}
+                    </div>
+                    {% if form.copyright_text.errors %}
+                        <div class="text-danger small mt-1">{{ form.copyright_text.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">e.g., "© 2024 Kalton Investment · All rights reserved"</div>
+                </div>
+            </div>
+
+            <!-- Right Column - Preview & Quick Actions -->
+            <div class="col-md-4">
+                <!-- Footer Preview Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-eye me-2 gold-accent"></i>Live Preview
+                        </h6>
+                        
+                        <div class="bg-dark text-white p-3 rounded-3" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+                            <div class="mb-2">
+                                <span class="fw-bold" id="previewCompany">{{ footer.company_name|default:"KALTON INVESTMENT" }}</span>
+                            </div>
+                            <div class="small mb-2">
+                                <span id="previewRegEn">{{ footer.registration_en|default:"Registered 17th May 2022" }}</span>
+                            </div>
+                            <div class="small mb-2">
+                                <span id="previewAddressEn">{{ footer.address_en|default:"Victoria Complex Building, Morogoro Road/Nzuguni Street, Dodoma"|truncatechars:40 }}</span>
+                            </div>
+                            <hr class="opacity-25">
+                            <div class="small text-center opacity-75">
+                                <span id="previewCopyright">{{ footer.copyright_text|default:"© 2024 Kalton Investment · All rights reserved" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Swahili Preview Toggle -->
+                        <button class="btn btn-sm btn-outline-gold w-100 mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#swahiliPreview">
+                            <i class="bi bi-flag me-1"></i> Show Swahili Preview
+                        </button>
+                        
+                        <div class="collapse mt-3" id="swahiliPreview">
+                            <div class="bg-dark text-white p-3 rounded-3" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+                                <div class="mb-2">
+                                    <span class="fw-bold">{{ footer.company_name|default:"KALTON INVESTMENT" }}</span>
+                                </div>
+                                <div class="small mb-2">
+                                    <span id="previewRegSw">{{ footer.registration_sw|default:"Imejiandikisha 17 Mei 2022" }}</span>
+                                </div>
+                                <div class="small mb-2">
+                                    <span id="previewAddressSw">{{ footer.address_sw|default:"Jengo la Victoria Complex, Morogoro Road/Nzuguni Street, Dodoma"|truncatechars:40 }}</span>
+                                </div>
+                                <hr class="opacity-25">
+                                <div class="small text-center opacity-75">
+                                    <span id="previewCopyrightSw">{{ footer.copyright_text|default:"© 2024 Kalton Investment · Haki zote zimehifadhiwa" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-lightning-charge me-2 gold-accent"></i>Quick Actions
+                        </h6>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="copyRegToSwahili">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Copy Registration to Swahili
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="copyAddressToSwahili">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Copy Address to Swahili
+                            </button>
+                            <hr class="my-2">
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="insertCurrentYear">
+                                <i class="bi bi-calendar3 me-1"></i>Insert Current Year
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="resetToDefault">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Default
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4 mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Use the quick actions above to copy English content to Swahili fields.</p>
+                </div>
+                <div>
+                    <span class="badge bg-gold text-dark">EN → SW</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end pt-3 border-top">
+            <button type="submit" class="btn btn-gold">
+                <i class="bi bi-save me-2"></i>Save All Changes
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Social Media Links Section -->
+<section class="section-card mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0"><i class="bi bi-share me-2 gold-accent"></i>Social Media Links</h5>
+        <a href="{% url 'website:admin_social_links' %}" class="btn btn-outline-gold btn-sm">
+            <i class="bi bi-gear me-1"></i>Manage Social Media
+        </a>
+    </div>
+    
+    <div class="bg-light p-4 rounded-4">
+        <div class="d-flex gap-3">
+            <div class="text-center">
+                <div class="bg-white rounded-circle p-3 shadow-sm mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-facebook fs-4" style="color: #1877f2;"></i>
+                </div>
+                <small class="d-block">Facebook</small>
+            </div>
+            <div class="text-center">
+                <div class="bg-white rounded-circle p-3 shadow-sm mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-instagram fs-4" style="color: #e4405f;"></i>
+                </div>
+                <small class="d-block">Instagram</small>
+            </div>
+            <div class="text-center">
+                <div class="bg-white rounded-circle p-3 shadow-sm mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-whatsapp fs-4" style="color: #25D366;"></i>
+                </div>
+                <small class="d-block">WhatsApp</small>
+            </div>
+            <div class="text-center">
+                <div class="bg-white rounded-circle p-3 shadow-sm mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-twitter-x fs-4"></i>
+                </div>
+                <small class="d-block">Twitter</small>
+            </div>
+            <div class="text-center">
+                <div class="bg-white rounded-circle p-3 shadow-sm mb-2" style="width: 50px; height: 50px;">
+                    <i class="bi bi-linkedin fs-4" style="color: #0a66c2;"></i>
+                </div>
+                <small class="d-block">LinkedIn</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Full Footer Preview -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>Complete Footer Preview</h5>
+    
+    <div class="border rounded-4 overflow-hidden">
+        <!-- Main Footer -->
+        <div class="bg-dark text-white p-4" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h6 class="fw-bold mb-3">{{ footer.company_name|default:"KALTON INVESTMENT" }}</h6>
+                    <p class="small opacity-75" id="fullPreviewRegEn">{{ footer.registration_en|default:"Registered 17th May 2022" }}</p>
+                    <p class="small opacity-75" id="fullPreviewAddressEn">{{ footer.address_en|default:"Victoria Complex Building, Morogoro Road/Nzuguni Street, Dodoma" }}</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled small opacity-75">
+                        <li class="mb-2">About Us</li>
+                        <li class="mb-2">Our Services</li>
+                        <li class="mb-2">Contact Us</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Follow Us</h6>
+                    <div class="d-flex gap-2">
+                        <i class="bi bi-facebook"></i>
+                        <i class="bi bi-instagram"></i>
+                        <i class="bi bi-whatsapp"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Copyright Bar -->
+        <div class="bg-dark text-white p-3 text-center border-top" style="background: #0b1423;">
+            <small class="opacity-75" id="fullPreviewCopyright">{{ footer.copyright_text|default:"© 2024 Kalton Investment · All rights reserved" }}</small>
+        </div>
+    </div>
+</section>
+
+<style>
+.bg-gold {
+    background-color: #f5b342 !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle active status
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Live preview updates
+    $('#id_company_name').on('input', function() {
+        var val = $(this).val() || 'KALTON INVESTMENT';
+        $('#previewCompany').text(val);
+    });
+
+    $('#id_registration_en').on('input', function() {
+        var val = $(this).val() || 'Registered 17th May 2022';
+        $('#previewRegEn').text(val);
+        $('#fullPreviewRegEn').text(val);
+    });
+
+    $('#id_registration_sw').on('input', function() {
+        var val = $(this).val() || 'Imejiandikisha 17 Mei 2022';
+        $('#previewRegSw').text(val);
+    });
+
+    $('#id_address_en').on('input', function() {
+        var val = $(this).val() || 'Victoria Complex Building, Morogoro Road/Nzuguni Street, Dodoma';
+        $('#previewAddressEn').text(val.substring(0, 40) + (val.length > 40 ? '...' : ''));
+        $('#fullPreviewAddressEn').text(val);
+    });
+
+    $('#id_address_sw').on('input', function() {
+        var val = $(this).val() || 'Jengo la Victoria Complex, Morogoro Road/Nzuguni Street, Dodoma';
+        $('#previewAddressSw').text(val.substring(0, 40) + (val.length > 40 ? '...' : ''));
+    });
+
+    $('#id_copyright_text').on('input', function() {
+        var val = $(this).val() || '© 2024 Kalton Investment · All rights reserved';
+        $('#previewCopyright').text(val);
+        $('#fullPreviewCopyright').text(val);
+        
+        // Auto-generate Swahili copyright if empty
+        if (!$('#id_copyright_text_sw').val()) {
+            var swVersion = val.replace('All rights reserved', 'Haki zote zimehifadhiwa');
+            $('#previewCopyrightSw').text(swVersion);
+        }
+    });
+
+    // Quick Actions
+    $('#copyRegToSwahili').click(function() {
+        var enReg = $('#id_registration_en').val();
+        if (enReg && !$('#id_registration_sw').val()) {
+            var swReg = enReg.replace('Registered', 'Imejiandikisha')
+                            .replace('May', 'Mei')
+                            .replace('th', '');
+            $('#id_registration_sw').val(swReg);
+            $('#previewRegSw').text(swReg);
+            toastr.success('Registration copied to Swahili!');
+        } else if (!enReg) {
+            toastr.warning('Please enter English registration first');
+        } else {
+            toastr.warning('Swahili registration field is not empty');
+        }
+    });
+
+    $('#copyAddressToSwahili').click(function() {
+        var enAddress = $('#id_address_en').val();
+        if (enAddress && !$('#id_address_sw').val()) {
+            $('#id_address_sw').val(enAddress);
+            $('#previewAddressSw').text(enAddress.substring(0, 40) + (enAddress.length > 40 ? '...' : ''));
+            toastr.success('Address copied to Swahili!');
+        } else if (!enAddress) {
+            toastr.warning('Please enter English address first');
+        } else {
+            toastr.warning('Swahili address field is not empty');
+        }
+    });
+
+    $('#insertCurrentYear').click(function() {
+        var currentYear = new Date().getFullYear();
+        var copyright = $('#id_copyright_text').val();
+        
+        if (copyright) {
+            // Replace year in copyright text
+            var newCopyright = copyright.replace(/\d{4}/g, currentYear);
+            $('#id_copyright_text').val(newCopyright);
+            $('#previewCopyright').text(newCopyright);
+            $('#fullPreviewCopyright').text(newCopyright);
+            toastr.success('Year updated!');
+        } else {
+            $('#id_copyright_text').val('© ' + currentYear + ' Kalton Investment · All rights reserved');
+            $('#previewCopyright').text('© ' + currentYear + ' Kalton Investment · All rights reserved');
+            $('#fullPreviewCopyright').text('© ' + currentYear + ' Kalton Investment · All rights reserved');
+            toastr.success('Copyright text created with current year!');
+        }
+    });
+
+    $('#resetToDefault').click(function() {
+        if (confirm('Reset all footer fields to default values?')) {
+            $('#id_company_name').val('KALTON INVESTMENT');
+            $('#id_registration_en').val('Registered 17th May 2022');
+            $('#id_registration_sw').val('Imejiandikisha 17 Mei 2022');
+            $('#id_address_en').val('Victoria Complex Building, Morogoro Road/Nzuguni Street, Nzuguni Area, Dodoma');
+            $('#id_address_sw').val('Jengo la Victoria Complex, Morogoro Road/Nzuguni Street, Nzuguni Area, Dodoma');
+            $('#id_copyright_text').val('© 2024 Kalton Investment · All rights reserved');
+            
+            // Trigger input events to update previews
+            $('#id_company_name, #id_registration_en, #id_registration_sw, #id_address_en, #id_address_sw, #id_copyright_text').trigger('input');
+            
+            toastr.success('Reset to default values');
+        }
+    });
+
+    // Form validation
+    $('#footerForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_company_name').val().trim()) {
+            toastr.error('Company name is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_address_en').val().trim()) {
+            toastr.error('English address is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_address_sw').val().trim()) {
+            toastr.error('Swahili address is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_copyright_text').val().trim()) {
+            toastr.error('Copyright text is required');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}

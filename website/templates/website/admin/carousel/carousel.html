@@ -1,0 +1,208 @@
+<!-- website/templates/website/admin/carousel/carousel.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Carousel Slides - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Carousel Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-images"></i></div>
+            <div>
+                <small class="text-muted">Total Slides</small>
+                <h3 class="mb-0 fw-bold">{{ slides.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <small class="text-muted">Active Slides</small>
+                <h3 class="mb-0 fw-bold">{{ slides.active.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+            <div>
+                <small class="text-muted">Bilingual</small>
+                <h3 class="mb-0 fw-bold">EN / SW</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CAROUSEL SLIDES LIST -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-images gold-accent"></i> Carousel Slides
+        </h4>
+        <a href="{% url 'website:admin_carousel_add' %}" class="btn btn-gold">
+            <i class="bi bi-plus-circle me-2"></i>Add New Slide
+        </a>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <div class="table-custom table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Image</th>
+                    <th>Title (EN)</th>
+                    <th>Badge</th>
+                    <th>Status</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sortable-slides">
+                {% for slide in slides %}
+                <tr data-id="{{ slide.id }}">
+                    <td>
+                        <i class="bi bi-grip-vertical drag-handle" style="cursor: grab;"></i>
+                    </td>
+                    <td>
+                        {% if slide.image %}
+                            <img src="{{ slide.image.url }}" alt="{{ slide.title_en }}" class="preview-img" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                        {% elif slide.image_url %}
+                            <img src="{{ slide.image_url }}" alt="{{ slide.title_en }}" class="preview-img" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                        {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td class="fw-semibold">{{ slide.title_en|truncatechars:30 }}</td>
+                    <td>
+                        <span class="badge" style="background-color: {{ slide.badge_bg_color|default:'#f5b342' }}; color: {% if slide.badge_bg_color|lower == '#f5b342' or not slide.badge_bg_color %}black{% else %}white{% endif %}">
+                            {{ slide.badge_text_en|default:"New" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if slide.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ slide.order }}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'website:admin_carousel_edit' slide.id %}" 
+                               class="btn btn-sm btn-outline-gold me-1" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal{{ slide.id }}"
+                                    title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal{{ slide.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                    Confirm Delete
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete this carousel slide?</p>
+                                <p class="fw-semibold">"{{ slide.title_en }}"</p>
+                                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form method="POST" action="{% url 'website:admin_carousel_delete' slide.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete Slide</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="bi bi-images display-4 text-muted"></i>
+                        <p class="mt-3 text-muted">No carousel slides found. Click "Add New Slide" to create one.</p>
+                        <a href="{% url 'website:admin_carousel_add' %}" class="btn btn-gold mt-2">
+                            <i class="bi bi-plus-circle me-2"></i>Add First Slide
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if slides %}
+    <p class="text-muted small mt-3">
+        <i class="bi bi-info-circle me-1"></i> 
+        Drag the <i class="bi bi-grip-vertical"></i> handle to reorder slides. Changes are saved automatically.
+    </p>
+    {% endif %}
+</section>
+
+<!-- LIVE PREVIEW SECTION -->
+{% if slides %}
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>Live Preview</h5>
+    
+    <div id="carouselPreview" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner rounded-4" style="max-height: 400px; overflow: hidden;">
+            {% for slide in slides %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                {% if slide.image %}
+                    <img src="{{ slide.image.url }}" class="d-block w-100" alt="{{ slide.title_en }}" style="object-fit: cover; height: 400px;">
+                {% elif slide.image_url %}
+                    <img src="{{ slide.image_url }}" class="d-block w-100" alt="{{ slide.title_en }}" style="object-fit: cover; height: 400px;">
+                {% endif %}
+                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-4 p-4">
+                    <span class="badge mb-2" style="background-color: {{ slide.badge_bg_color|default:'#f5b342' }};">{{ slide.badge_text_en }}</span>
+                    <h3>{{ slide.title_en }}</h3>
+                    <p>{{ slide.description_en|truncatechars:100 }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselPreview" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselPreview" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+{% endblock %}

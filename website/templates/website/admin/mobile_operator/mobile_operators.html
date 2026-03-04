@@ -1,0 +1,395 @@
+<!-- website/templates/website/admin/mobile_operators.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Mobile Operators - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Mobile Money Operators Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-phone"></i></div>
+            <div>
+                <small class="text-muted">Total Operators</small>
+                <h3 class="mb-0 fw-bold">{{ operators.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <small class="text-muted">Active Operators</small>
+                <h3 class="mb-0 fw-bold">{{ operators.active.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-sim"></i></div>
+            <div>
+                <small class="text-muted">Networks</small>
+                <h3 class="mb-0 fw-bold">{{ operators.count }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ADD FORM -->
+<section class="section-card mb-4">
+    <h4 class="section-title mb-0">
+        <i class="bi bi-plus-circle gold-accent"></i> Quick Add Mobile Operator
+    </h4>
+    
+    <form method="POST" action="{% url 'website:admin_mobile_operator_add' %}" class="mt-4">
+        {% csrf_token %}
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Operator Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g., Airtel Money, M-Pesa, Tigo Pesa" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Network Type (Optional)</label>
+                <select name="network_type" class="form-select">
+                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Telecom">Telecom</option>
+                    <option value="Fintech">Fintech</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-gold w-100">
+                    <i class="bi bi-plus-circle me-2"></i>Add
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- MOBILE OPERATORS LIST -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-phone gold-accent"></i> Mobile Money Operators
+        </h4>
+        <div class="d-flex gap-2">
+            <span class="text-muted small">Total: {{ operators.count }} operators</span>
+            <button class="btn btn-sm btn-outline-gold" id="toggleView">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <!-- Card Grid View -->
+    <div class="row g-4" id="gridView">
+        {% for operator in operators %}
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm operator-card" style="border-radius: 1.5rem;" data-id="{{ operator.id }}">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="stat-icon" style="width: 50px; height: 50px; background: {% cycle 'rgba(245, 180, 66, 0.1)' 'rgba(37, 99, 235, 0.1)' 'rgba(22, 163, 74, 0.1)' %}">
+                            <i class="bi {% cycle 'bi-phone' 'bi-sim' 'bi-wifi' %}"></i>
+                        </div>
+                        <div class="d-flex flex-column align-items-end">
+                            {% if operator.is_active %}
+                                <span class="badge bg-success mb-2">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary mb-2">Inactive</span>
+                            {% endif %}
+                            <span class="badge bg-light text-dark">Order: {{ operator.order }}</span>
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title fw-bold mb-2">{{ operator.name }}</h5>
+                    <p class="text-muted small mb-3">{{ operator.network_type|default:"Mobile Money Operator" }}</p>
+                    
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteModal{{ operator.id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal{{ operator.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            Confirm Delete
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to remove <strong>{{ operator.name }}</strong> from mobile operators?</p>
+                        <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="POST" action="{% url 'website:admin_mobile_operator_delete' operator.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Remove Operator</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-phone display-4 text-muted"></i>
+            <p class="mt-3 text-muted">No mobile operators added yet. Add your first operator above.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Table View (hidden by default) -->
+    <div class="table-responsive" id="tableView" style="display: none;">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Operator</th>
+                    <th>Network Type</th>
+                    <th>Status</th>
+                    <th>Order</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for operator in operators %}
+                <tr>
+                    <td>
+                        <i class="bi {% cycle 'bi-phone' 'bi-sim' 'bi-wifi' %} gold-accent"></i>
+                    </td>
+                    <td class="fw-semibold">{{ operator.name }}</td>
+                    <td>{{ operator.network_type|default:"Mobile Money" }}</td>
+                    <td>
+                        {% if operator.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ operator.order }}</td>
+                    <td><small class="text-muted">{{ operator.created_at|date:"M d, Y" }}</small></td>
+                    <td>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteModal{{ operator.id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Drag & Drop Reorder Notice -->
+    {% if operators.count > 1 %}
+    <p class="text-muted small mt-3">
+        <i class="bi bi-info-circle me-1"></i> 
+        To reorder operators, drag and drop cards. Reordering coming soon.
+    </p>
+    {% endif %}
+</section>
+
+<!-- Popular Operators Quick Reference -->
+{% if operators %}
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-star-fill me-2 gold-accent"></i>Popular Operators</h5>
+    
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="bg-light p-3 rounded-4">
+                <h6 class="fw-semibold mb-2">Tanzania Mobile Money</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for operator in operators|slice:":5" %}
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-check-circle-fill text-success me-1" style="font-size: 0.8rem;"></i>
+                        {{ operator.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-light p-3 rounded-4">
+                <h6 class="fw-semibold mb-2">Quick Stats</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Most Popular</small>
+                        <span class="fw-bold">{{ operators.first.name }}</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Total Transactions</small>
+                        <span class="fw-bold">via Kalton</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Live Preview Section -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>How It Appears on Website</h5>
+    
+    <div class="bg-light p-4 rounded-4">
+        <div class="d-flex flex-wrap align-items-center gap-4">
+            <h6 class="mb-0">We Accept:</h6>
+            {% for operator in operators|slice:":6" %}
+            <div class="text-center">
+                <div class="bg-white rounded-circle p-3 shadow-sm mb-2" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi {% cycle 'bi-phone' 'bi-sim' 'bi-wifi' 'bi-phone' 'bi-sim' 'bi-wifi' %} fs-3 gold-accent"></i>
+                </div>
+                <small class="d-block">{{ operator.name|truncatechars:12 }}</small>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">No operators added yet</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle between grid and table view
+    let gridView = true;
+    
+    $('#toggleView').click(function() {
+        if (gridView) {
+            $('#gridView').hide();
+            $('#tableView').show();
+            $(this).html('<i class="bi bi-grid-3x3-gap-fill"></i>');
+            gridView = false;
+        } else {
+            $('#gridView').show();
+            $('#tableView').hide();
+            $(this).html('<i class="bi bi-list-ul"></i>');
+            gridView = true;
+        }
+    });
+
+    // Quick add form validation
+    $('form').submit(function(e) {
+        let operatorName = $(this).find('input[name="name"]').val().trim();
+        if (!operatorName) {
+            e.preventDefault();
+            toastr.error('Please enter an operator name');
+        }
+    });
+
+    // Search/filter functionality
+    $('#searchOperator').on('input', function() {
+        let searchTerm = $(this).val().toLowerCase();
+        let visibleCount = 0;
+        
+        $('.col-md-3').each(function() {
+            let operatorName = $(this).find('.card-title').text().toLowerCase();
+            if (operatorName.includes(searchTerm) || searchTerm === '') {
+                $(this).show();
+                visibleCount++;
+            } else {
+                $(this).hide();
+            }
+        });
+        
+        // Show/hide no results message
+        if (visibleCount === 0 && searchTerm !== '') {
+            if ($('#noResultsMsg').length === 0) {
+                $('#gridView').append('<div class="col-12 text-center py-4" id="noResultsMsg"><p class="text-muted">No operators match "' + searchTerm + '"</p></div>');
+            }
+        } else {
+            $('#noResultsMsg').remove();
+        }
+    });
+
+    // Operator card hover effect
+    $('.operator-card').hover(
+        function() {
+            $(this).addClass('shadow');
+        },
+        function() {
+            $(this).removeClass('shadow');
+        }
+    );
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// Add search input to header if there are operators
+{% if operators %}
+$(document).ready(function() {
+    $('.section-card:first .d-flex').append(`
+        <div class="ms-auto">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light border-0">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control form-control-sm" id="searchOperator" placeholder="Search operators..." style="width: 200px;">
+            </div>
+        </div>
+    `);
+});
+{% endif %}
+</script>
+
+<style>
+/* Custom styles for operator cards */
+.operator-card {
+    transition: all 0.3s ease;
+}
+
+.operator-card:hover {
+    transform: translateY(-5px);
+    border-color: #f5b34240 !important;
+}
+
+/* Status badges */
+.badge.bg-success {
+    background-color: #22c55e !important;
+}
+
+.badge.bg-secondary {
+    background-color: #64748b !important;
+}
+
+/* Icon colors */
+.bi-phone, .bi-sim, .bi-wifi {
+    font-size: 1.5rem;
+}
+
+/* Grid/Table toggle */
+#toggleView {
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+}
+</style>
+{% endblock %}

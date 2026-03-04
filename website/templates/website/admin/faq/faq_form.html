@@ -1,0 +1,380 @@
+<!-- website/templates/website/admin/faq_form.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}{% if faq %}Edit{% else %}Add{% endif %} FAQ - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}{% if faq %}Edit{% else %}Add New{% endif %} FAQ{% endblock %}
+
+{% block content %}
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi {% if faq %}bi-pencil-square{% else %}bi-plus-circle{% endif %} gold-accent"></i>
+            {% if faq %}Edit: {{ faq.question_en|truncatechars:50 }}{% else %}Create New FAQ{% endif %}
+        </h4>
+        <a href="{% url 'website:admin_faqs' %}" class="btn btn-outline-gold">
+            <i class="bi bi-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="faqForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        {% if faq %}
+        <div class="alert {% if faq.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if faq.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>FAQ Status:</strong> 
+                {% if faq.is_active %}
+                    <span class="badge bg-success">Active</span> - Visible on website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Hidden from website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Created: {{ faq.created_at|date:"M d, Y" }} | Last updated: {{ faq.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+        {% endif %}
+
+        <!-- Active Status and Order Fields from BaseModel -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                            <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                            <span id="activeStatusText">
+                                {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                            </span>
+                        </label>
+                    </div>
+                    {% if form.is_active.help_text %}
+                    <div class="form-text text-muted mt-2">
+                        <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                    {{ form.order }}
+                    {% if form.order.help_text %}
+                    <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - English -->
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 h-100">
+                    <h5 class="mb-3">
+                        <i class="bi bi-flag me-2 gold-accent"></i>English Version
+                    </h5>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Question (English) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.question_en }}
+                        {% if form.question_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.question_en.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="enQuestionCount">0/300</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Answer (English) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.answer_en }}
+                        {% if form.answer_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.answer_en.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="enAnswerCount">0 characters</span>
+                        </div>
+                    </div>
+
+                    <!-- English Preview -->
+                    <div class="bg-light p-3 rounded-3 mt-3">
+                        <h6 class="fw-semibold mb-2">Preview:</h6>
+                        <p class="mb-1"><strong>Q:</strong> <span id="previewQuestionEn">{{ form.question_en.value|default:'Question will appear here' }}</span></p>
+                        <p class="mb-0"><strong>A:</strong> <span id="previewAnswerEn">{{ form.answer_en.value|default:'Answer will appear here'|linebreaksbr }}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Swahili -->
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 h-100">
+                    <h5 class="mb-3">
+                        <i class="bi bi-flag me-2 gold-accent"></i>Swahili Version
+                    </h5>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Question (Swahili) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.question_sw }}
+                        {% if form.question_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.question_sw.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="swQuestionCount">0/300</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Answer (Swahili) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.answer_sw }}
+                        {% if form.answer_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.answer_sw.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="swAnswerCount">0 characters</span>
+                        </div>
+                    </div>
+
+                    <!-- Swahili Preview -->
+                    <div class="bg-light p-3 rounded-3 mt-3">
+                        <h6 class="fw-semibold mb-2">Preview:</h6>
+                        <p class="mb-1"><strong>Swali:</strong> <span id="previewQuestionSw">{{ form.question_sw.value|default:'Swali litaonekana hapa' }}</span></p>
+                        <p class="mb-0"><strong>Jibu:</strong> <span id="previewAnswerSw">{{ form.answer_sw.value|default:'Jibu litaonekana hapa'|linebreaksbr }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4 mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Copy English content to Swahili fields to get started.</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-gold me-2" id="copyQuestionToSwahili">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Question
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyAnswerToSwahili">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-4">
+            <div>
+                {% if faq %}
+                <button type="button" class="btn btn-outline-danger" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash me-2"></i>Delete FAQ
+                </button>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'website:admin_faqs' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-gold">
+                    <i class="bi bi-save me-2"></i>
+                    {% if faq %}Update{% else %}Create{% endif %} FAQ
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Delete Modal -->
+{% if faq %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this FAQ?</p>
+                <p class="fw-semibold">"{{ faq.question_en }}"</p>
+                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'website:admin_faq_delete' faq.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete FAQ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Character counters with max length for questions
+    function updateCharCount(field, counterId, maxLength) {
+        $(field).on('input', function() {
+            var count = $(this).val().length;
+            $(counterId).text(count + '/' + maxLength);
+            if (count > maxLength) {
+                $(counterId).addClass('bg-danger text-white');
+            } else {
+                $(counterId).removeClass('bg-danger text-white');
+            }
+        });
+        // Initial count
+        var initialCount = $(field).val().length;
+        $(counterId).text(initialCount + '/300');
+    }
+
+    function updateTextCount(field, counterId) {
+        $(field).on('input', function() {
+            var count = $(this).val().length;
+            $(counterId).text(count + ' characters');
+        });
+        // Initial count
+        $(counterId).text($(field).val().length + ' characters');
+    }
+
+    updateCharCount('#id_question_en', '#enQuestionCount', 300);
+    updateCharCount('#id_question_sw', '#swQuestionCount', 300);
+    updateTextCount('#id_answer_en', '#enAnswerCount');
+    updateTextCount('#id_answer_sw', '#swAnswerCount');
+
+    // Toggle icon and text when checkbox changes
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Live preview updates
+    $('#id_question_en').on('input', function() {
+        $('#previewQuestionEn').text($(this).val() || 'Question will appear here');
+    });
+
+    $('#id_answer_en').on('input', function() {
+        var answer = $(this).val().replace(/\n/g, '<br>');
+        $('#previewAnswerEn').html(answer || 'Answer will appear here');
+    });
+
+    $('#id_question_sw').on('input', function() {
+        $('#previewQuestionSw').text($(this).val() || 'Swali litaonekana hapa');
+    });
+
+    $('#id_answer_sw').on('input', function() {
+        var answer = $(this).val().replace(/\n/g, '<br>');
+        $('#previewAnswerSw').html(answer || 'Jibu litaonekana hapa');
+    });
+
+    // Copy to Swahili
+    $('#copyQuestionToSwahili').click(function() {
+        var enQuestion = $('#id_question_en').val();
+        if (enQuestion && !$('#id_question_sw').val()) {
+            $('#id_question_sw').val(enQuestion);
+            $('#previewQuestionSw').text(enQuestion);
+            $('#swQuestionCount').text(enQuestion.length + '/300');
+            toastr.success('Question copied to Swahili!');
+        } else if (!enQuestion) {
+            toastr.warning('Please enter an English question first');
+        } else {
+            toastr.warning('Swahili question field is not empty');
+        }
+    });
+
+    $('#copyAnswerToSwahili').click(function() {
+        var enAnswer = $('#id_answer_en').val();
+        if (enAnswer && !$('#id_answer_sw').val()) {
+            $('#id_answer_sw').val(enAnswer);
+            $('#previewAnswerSw').text(enAnswer);
+            $('#swAnswerCount').text(enAnswer.length + ' characters');
+            toastr.success('Answer copied to Swahili!');
+        } else if (!enAnswer) {
+            toastr.warning('Please enter an English answer first');
+        } else {
+            toastr.warning('Swahili answer field is not empty');
+        }
+    });
+
+    // Form validation
+    $('#faqForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_question_en').val().trim()) {
+            toastr.error('English question is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_question_sw').val().trim()) {
+            toastr.error('Swahili question is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_answer_en').val().trim()) {
+            toastr.error('English answer is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_answer_sw').val().trim()) {
+            toastr.error('Swahili answer is required');
+            isValid = false;
+        }
+        
+        // Check question length
+        if ($('#id_question_en').val().length > 300) {
+            toastr.error('English question cannot exceed 300 characters');
+            isValid = false;
+        }
+        
+        if ($('#id_question_sw').val().length > 300) {
+            toastr.error('Swahili question cannot exceed 300 characters');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}

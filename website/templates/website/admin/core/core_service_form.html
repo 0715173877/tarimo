@@ -1,0 +1,384 @@
+<!-- website/templates/website/admin/core_service_form.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}{% if service %}Edit{% else %}Add{% endif %} Core Service - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}{% if service %}Edit{% else %}Add New{% endif %} Core Service{% endblock %}
+
+{% block content %}
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi {% if service %}bi-pencil-square{% else %}bi-plus-circle{% endif %} gold-accent"></i>
+            {% if service %}Edit: {{ service.title_en }}{% else %}Create New Core Service{% endif %}
+        </h4>
+        <a href="{% url 'website:admin_core_services' %}" class="btn btn-outline-gold">
+            <i class="bi bi-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="coreServiceForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar for Active/Inactive -->
+        {% if service %}
+        <div class="alert {% if service.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if service.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Status:</strong> 
+                {% if service.is_active %}
+                    <span class="badge bg-success">Active</span> - Visible on website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Hidden from website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Created: {{ service.created_at|date:"M d, Y" }} | Last updated: {{ service.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+        {% endif %}
+
+        <!-- Active Status and Order Fields -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                            <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                            <span id="activeStatusText">
+                                {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                            </span>
+                        </label>
+                    </div>
+                    {% if form.is_active.help_text %}
+                    <div class="form-text text-muted mt-2">
+                        <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                    {{ form.order }}
+                    {% if form.order.help_text %}
+                    <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Icon Selection -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12">
+                <label class="form-label fw-semibold">Service Icon</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-light" style="border-radius: 50px 0 0 50px;">
+                        <i class="bi {{ form.icon.value|default:'bi-bank2' }}" id="iconPreview" style="font-size: 1.2rem;"></i>
+                    </span>
+                    {{ form.icon }}
+                </div>
+                
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-bank2">
+                        <i class="bi bi-bank2 me-1"></i>Banking
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-phone">
+                        <i class="bi bi-phone me-1"></i>Mobile
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-send">
+                        <i class="bi bi-send me-1"></i>Transfer
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-clock">
+                        <i class="bi bi-clock me-1"></i>Hours
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-wallet2">
+                        <i class="bi bi-wallet2 me-1"></i>Wallet
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-cash">
+                        <i class="bi bi-cash me-1"></i>Cash
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-credit-card">
+                        <i class="bi bi-credit-card me-1"></i>Card
+                    </span>
+                    <span class="badge bg-light text-dark p-2 icon-selector" data-icon="bi-shield">
+                        <i class="bi bi-shield me-1"></i>Secure
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- English Fields -->
+        <h5 class="border-bottom pb-2 mb-3">
+            <i class="bi bi-flag me-2 gold-accent"></i>English Content
+        </h5>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Title (English) <span class="text-danger">*</span></label>
+                {{ form.title_en }}
+                {% if form.title_en.errors %}
+                    <div class="text-danger small mt-1">{{ form.title_en.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-12">
+                <label class="form-label fw-semibold">Description (English) <span class="text-danger">*</span></label>
+                {{ form.description_en }}
+                {% if form.description_en.errors %}
+                    <div class="text-danger small mt-1">{{ form.description_en.errors }}</div>
+                {% endif %}
+                <div class="d-flex justify-content-end mt-1">
+                    <span class="badge bg-light text-dark" id="enCharCount">0/300 characters</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swahili Fields -->
+        <h5 class="border-bottom pb-2 mb-3">
+            <i class="bi bi-flag me-2 gold-accent"></i>Swahili Content
+        </h5>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Title (Swahili) <span class="text-danger">*</span></label>
+                {{ form.title_sw }}
+                {% if form.title_sw.errors %}
+                    <div class="text-danger small mt-1">{{ form.title_sw.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-12">
+                <label class="form-label fw-semibold">Description (Swahili) <span class="text-danger">*</span></label>
+                {{ form.description_sw }}
+                {% if form.description_sw.errors %}
+                    <div class="text-danger small mt-1">{{ form.description_sw.errors }}</div>
+                {% endif %}
+                <div class="d-flex justify-content-end mt-1">
+                    <span class="badge bg-light text-dark" id="swCharCount">0/300 characters</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Copy English content to Swahili fields to get started.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-gold" id="copyToSwahili">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Copy to Swahili
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <div>
+                {% if service %}
+                <button type="button" class="btn btn-outline-danger" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash me-2"></i>Delete Service
+                </button>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'website:admin_core_services' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-gold">
+                    <i class="bi bi-save me-2"></i>
+                    {% if service %}Update{% else %}Create{% endif %} Service
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Preview Card -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>Live Preview</h5>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4 text-center" id="previewEnglish">
+                <div class="stat-icon mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2.2rem;">
+                    <i class="bi {{ form.icon.value|default:'bi-bank2' }}" id="previewIcon"></i>
+                </div>
+                <h5 id="previewTitleEn">{{ form.title_en.value|default:'Service Title' }}</h5>
+                <p class="text-muted small" id="previewDescEn">{{ form.description_en.value|default:'Service description will appear here...' }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4 text-center bg-light" id="previewSwahili">
+                <div class="stat-icon mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2.2rem;">
+                    <i class="bi {{ form.icon.value|default:'bi-bank2' }}"></i>
+                </div>
+                <h5 id="previewTitleSw">{{ form.title_sw.value|default:'Kichwa cha Huduma' }}</h5>
+                <p class="text-muted small" id="previewDescSw">{{ form.description_sw.value|default:'Maelezo ya huduma yataonekana hapa...' }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Delete Modal -->
+{% if service %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the service "<strong>{{ service.title_en }}</strong>"?</p>
+                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'website:admin_core_service_delete' service.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Service</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Character counters with max length
+    function updateCharCount(textarea, counterId, maxLength) {
+        $(textarea).on('input', function() {
+            var count = $(this).val().length;
+            $(counterId).text(count + '/' + maxLength + ' characters');
+            if (count > maxLength) {
+                $(counterId).addClass('bg-danger text-white');
+            } else {
+                $(counterId).removeClass('bg-danger text-white');
+            }
+        });
+        // Initial count
+        var initialCount = $(textarea).val().length;
+        $(counterId).text(initialCount + '/300 characters');
+    }
+
+    updateCharCount('textarea[name="description_en"]', '#enCharCount', 300);
+    updateCharCount('textarea[name="description_sw"]', '#swCharCount', 300);
+
+    // Icon selector
+    $('.icon-selector').click(function() {
+        var icon = $(this).data('icon');
+        $('#id_icon').val(icon);
+        $('#iconPreview').attr('class', 'bi ' + icon);
+        $('.stat-icon i').attr('class', 'bi ' + icon);
+    });
+
+    // Update icon preview on input
+    $('#id_icon').on('input', function() {
+        $('#iconPreview').attr('class', 'bi ' + $(this).val());
+    });
+
+    // Live preview updates
+    $('#id_title_en').on('input', function() {
+        $('#previewTitleEn').text($(this).val() || 'Service Title');
+    });
+
+    $('#id_title_sw').on('input', function() {
+        $('#previewTitleSw').text($(this).val() || 'Kichwa cha Huduma');
+    });
+
+    $('#id_description_en').on('input', function() {
+        $('#previewDescEn').text($(this).val() || 'Service description will appear here...');
+    });
+
+    $('#id_description_sw').on('input', function() {
+        $('#previewDescSw').text($(this).val() || 'Maelezo ya huduma yataonekana hapa...');
+    });
+
+    // Copy English to Swahili
+    $('#copyToSwahili').click(function() {
+        var enTitle = $('#id_title_en').val();
+        var enDesc = $('#id_description_en').val();
+        
+        if (enTitle && !$('#id_title_sw').val()) {
+            $('#id_title_sw').val(enTitle);
+            $('#previewTitleSw').text(enTitle);
+        }
+        
+        if (enDesc && !$('#id_description_sw').val()) {
+            $('#id_description_sw').val(enDesc);
+            $('#previewDescSw').text(enDesc);
+            $('#swCharCount').text(enDesc.length + '/300 characters');
+        }
+        
+        toastr.success('Copied to Swahili fields!');
+    });
+
+    // Toggle icon and text when checkbox changes
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Form validation
+    $('#coreServiceForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_title_en').val().trim()) {
+            toastr.error('English title is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_title_sw').val().trim()) {
+            toastr.error('Swahili title is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_description_en').val().trim()) {
+            toastr.error('English description is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_description_sw').val().trim()) {
+            toastr.error('Swahili description is required');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}

@@ -24,6 +24,7 @@ def home(request):
         'core_services': CoreService.objects.filter(is_active=True).order_by('order'),
         'carousel_slides': CarouselSlide.objects.filter(is_active=True).order_by('order'),
         'branches': Branch.objects.filter(is_active=True).order_by('-is_main', 'order'),
+        'promo': PromoBlock.objects.first(),
         'partner_banks': PartnerBank.objects.filter(is_active=True).order_by('order'),
         'mobile_operators': MobileOperator.objects.filter(is_active=True).order_by('order'),
         'transfer_partners': TransferPartner.objects.filter(is_active=True).order_by('order'),
@@ -103,7 +104,7 @@ def admin_panel(request):
         'settings': WebsiteSetting.objects.first(),
         'current_year': datetime.now().year,
     }
-    return render(request, 'website/admin_panel.html', context)
+    return render(request, 'website/admin/admin_panel.html', context)
 
 # Hero Section Management
 @login_required
@@ -122,7 +123,7 @@ def admin_hero(request):
     else:
         form = HeroSectionForm(instance=hero)
     
-    return render(request, 'website/admin/hero.html', {'form': form})
+    return render(request, 'website/admin/hero/hero.html', {'form': form})
 
 # Contact Information Management
 @login_required
@@ -141,14 +142,14 @@ def admin_contact(request):
     else:
         form = ContactInfoForm(instance=contact)
     
-    return render(request, 'website/admin/contact.html', {'form': form})
+    return render(request, 'website/admin/contact/contact.html', {'form': form})
 
 # About Sections Management
 @login_required
 def admin_about_list(request):
     """List all about sections"""
     sections = AboutSection.objects.all().order_by('order')
-    return render(request, 'website/admin/about_list.html', {'sections': sections})
+    return render(request, 'website/admin/about/about_list.html', {'sections': sections})
 
 @login_required
 def admin_about_edit(request, pk=None):
@@ -167,7 +168,7 @@ def admin_about_edit(request, pk=None):
     else:
         form = AboutSectionForm(instance=section)
     
-    return render(request, 'website/admin/about_form.html', {'form': form, 'section': section})
+    return render(request, 'website/admin/about/about_form.html', {'form': form, 'section': section})
 
 @login_required
 def admin_about_delete(request, pk):
@@ -182,7 +183,7 @@ def admin_about_delete(request, pk):
 def admin_core_services(request):
     """List all core services"""
     services = CoreService.objects.all().order_by('order')
-    return render(request, 'website/admin/core_services.html', {'services': services})
+    return render(request, 'website/admin/core/core_services.html', {'services': services})
 
 @login_required
 def admin_core_service_edit(request, pk=None):
@@ -201,7 +202,7 @@ def admin_core_service_edit(request, pk=None):
     else:
         form = CoreServiceForm(instance=service)
     
-    return render(request, 'website/admin/core_service_form.html', {'form': form, 'service': service})
+    return render(request, 'website/admin/core/core_service_form.html', {'form': form, 'service': service})
 
 @login_required
 def admin_core_service_delete(request, pk):
@@ -230,7 +231,7 @@ def admin_core_service_reorder(request):
 def admin_branches(request):
     """List all branches"""
     branches = Branch.objects.all().order_by('-is_main', 'order')
-    return render(request, 'website/admin/branches.html', {'branches': branches})
+    return render(request, 'website/admin/branch/branches.html', {'branches': branches})
 
 @login_required
 def admin_branch_edit(request, pk=None):
@@ -252,7 +253,7 @@ def admin_branch_edit(request, pk=None):
     else:
         form = BranchForm(instance=branch)
     
-    return render(request, 'website/admin/branch_form.html', {'form': form, 'branch': branch})
+    return render(request, 'website/admin/branch/branch_form.html', {'form': form, 'branch': branch})
 
 @login_required
 def admin_branch_delete(request, pk):
@@ -285,14 +286,14 @@ def admin_location(request):
     else:
         form = LocationForm(instance=location)
     
-    return render(request, 'website/admin/location.html', {'form': form, 'location': location})
+    return render(request, 'website/admin/location/location.html', {'form': form, 'location': location})
 
 # FAQ Management
 @login_required
 def admin_faqs(request):
     """List all FAQs"""
     faqs = FAQ.objects.all().order_by('order')
-    return render(request, 'website/admin/faqs.html', {'faqs': faqs})
+    return render(request, 'website/admin/faq/faqs.html', {'faqs': faqs})
 
 @login_required
 def admin_faq_edit(request, pk=None):
@@ -311,7 +312,7 @@ def admin_faq_edit(request, pk=None):
     else:
         form = FAQForm(instance=faq)
     
-    return render(request, 'website/admin/faq_form.html', {'form': form, 'faq': faq})
+    return render(request, 'website/admin/faq/faq_form.html', {'form': form, 'faq': faq})
 
 @login_required
 def admin_faq_delete(request, pk):
@@ -326,7 +327,7 @@ def admin_faq_delete(request, pk):
 def admin_carousel(request):
     """List all carousel slides"""
     slides = CarouselSlide.objects.all().order_by('order')
-    return render(request, 'website/admin/carousel.html', {'slides': slides})
+    return render(request, 'website/admin/carousel/carousel.html', {'slides': slides})
 
 @login_required
 def admin_carousel_edit(request, pk=None):
@@ -345,7 +346,7 @@ def admin_carousel_edit(request, pk=None):
     else:
         form = CarouselSlideForm(instance=slide)
     
-    return render(request, 'website/admin/carousel_form.html', {'form': form, 'slide': slide})
+    return render(request, 'website/admin/carousel/carousel_form.html', {'form': form, 'slide': slide})
 
 @login_required
 def admin_carousel_delete(request, pk):
@@ -362,7 +363,7 @@ def admin_carousel_delete(request, pk):
 def admin_partner_banks(request):
     """List all partner banks"""
     banks = PartnerBank.objects.all().order_by('order')
-    return render(request, 'website/admin/partner_banks.html', {'banks': banks})
+    return render(request, 'website/admin/partner/partner_banks.html', {'banks': banks})
 
 @login_required
 def admin_partner_bank_add(request):
@@ -390,7 +391,7 @@ def admin_partner_bank_delete(request, pk):
 def admin_mobile_operators(request):
     """List all mobile operators"""
     operators = MobileOperator.objects.all().order_by('order')
-    return render(request, 'website/admin/mobile_operators.html', {'operators': operators})
+    return render(request, 'website/admin/mobile_operator/mobile_operators.html', {'operators': operators})
 
 @login_required
 def admin_mobile_operator_add(request):
@@ -458,7 +459,7 @@ def admin_visitor_counter(request):
     else:
         form = VisitorCounterForm(instance=counter)
     
-    return render(request, 'website/admin/visitor_counter.html', {'form': form})
+    return render(request, 'website/admin/settings/visitor_counter.html', {'form': form})
 
 # Footer Management
 @login_required
@@ -477,14 +478,14 @@ def admin_footer(request):
     else:
         form = FooterContentForm(instance=footer)
     
-    return render(request, 'website/admin/footer.html', {'form': form})
+    return render(request, 'website/admin/footer/footer.html', {'form': form})
 
 # Social Media Links Management
 @login_required
 def admin_social_links(request):
     """List all social media links"""
     links = SocialMediaLink.objects.all().order_by('order')
-    return render(request, 'website/admin/social_links.html', {'links': links})
+    return render(request, 'website/admin/social/social_links.html', {'links': links})
 
 @login_required
 def admin_social_link_edit(request, pk=None):
@@ -503,7 +504,7 @@ def admin_social_link_edit(request, pk=None):
     else:
         form = SocialMediaLinkForm(instance=link)
     
-    return render(request, 'website/admin/social_link_form.html', {'form': form, 'link': link})
+    return render(request, 'website/admin/social/social_link_form.html', {'form': form, 'link': link})
 
 @login_required
 def admin_social_link_delete(request, pk):
@@ -541,7 +542,55 @@ def admin_settings(request):
         messages.success(request, 'Settings updated successfully!')
         return redirect('website:admin_settings')
     
-    return render(request, 'website/admin/settings.html', {'settings': settings})
+    return render(request, 'website/admin/settings/settings.html', {'settings': settings})
+
+
+# website/views.py
+
+# Promo Block Management
+@login_required
+def admin_promo_block(request):
+    """Manage promo block"""
+    promo = PromoBlock.objects.first()
+    if not promo:
+        promo = PromoBlock.objects.create()
+    
+    if request.method == 'POST':
+        form = PromoBlockForm(request.POST, instance=promo)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Promotional block updated successfully!')
+            return redirect('website:admin_promo_block')
+    else:
+        form = PromoBlockForm(instance=promo)
+    
+    return render(request, 'website/admin/promo/promo_block.html', {'form': form, 'promo': promo})
+
+# Public view to get promo block data (for AJAX if needed)
+@login_required
+@csrf_exempt
+def get_promo_block(request):
+    """Return promo block data as JSON"""
+    promo = PromoBlock.objects.first()
+    if not promo:
+        promo = PromoBlock.objects.create()
+    
+    data = {
+        'id': promo.id,
+        'title_en': promo.title_en,
+        'title_sw': promo.title_sw,
+        'description_en': promo.description_en,
+        'description_sw': promo.description_sw,
+        'button_text_en': promo.button_text_en,
+        'button_text_sw': promo.button_text_sw,
+        'button_link': promo.button_link,
+        'button_icon': promo.button_icon,
+        'background_color': promo.background_color,
+        'text_color': promo.text_color,
+        'accent_color': promo.accent_color,
+        'is_active': promo.is_active,
+    }
+    return JsonResponse(data)
 
 # Keep your existing API views
 @login_required
@@ -673,3 +722,6 @@ def api_reorder_section(request, section):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+
+

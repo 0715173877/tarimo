@@ -156,23 +156,25 @@
     </div>
 
     <!-- Swahili Block -->
-    <div class="swahili-block-premium my-5" data-aos="zoom-in">
+    <div class="swahili-block-premium my-5" data-aos="zoom-in" 
+        style="background-color: {{ promo.background_color|default:'#0b1423' }}; padding: 2rem; border-radius: 1rem;">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h3 style="font-family:'Playfair Display';font-size:2.5rem;color:#f5b342;" 
-                    data-en="YOUR TRUSTED BANKING & MOBILE MONEY AGENT" 
-                    data-sw="WAKALA WAKO WA BENKI NA PESA KWA SIMU">
-                    YOUR TRUSTED BANKING & MOBILE MONEY AGENT
+                <h3 style="font-family:'Playfair Display'; font-size:2.5rem; color:{{ promo.accent_color|default:'#f5b342' }};" 
+                    data-en="{{ promo.title_en }}" 
+                    data-sw="{{ promo.title_sw }}">
+                    {{ promo.title_en }}
                 </h3>
-                <p class="fs-4 text-white-50 mb-0" 
-                   data-en="Banking, mobile money and international money transfers – Nzuguni, Dodoma" 
-                   data-sw="Huduma za kibenki, mitandao ya simu na uhamisho wa fedha kimataifa – Nzuguni, Dodoma">
-                    Banking, mobile money and international money transfers – Nzuguni, Dodoma
+                <p class="fs-4 mb-0" style="color:{{ promo.text_color|default:'#ffffff' }};" 
+                data-en="{{ promo.description_en }}" 
+                data-sw="{{ promo.description_sw }}">
+                    {{ promo.description_en }}
                 </p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a href="#contact" class="btn btn-outline-gold btn-lg">
-                    <i class="bi bi-whatsapp me-2"></i><span data-en="Contact Us" data-sw="Wasiliana Nasi">Contact Us</span>
+                <a href="{{ promo.button_link|default:'#contact' }}" class="btn btn-outline-gold btn-lg">
+                    <i class="bi {{ promo.button_icon|default:'bi-whatsapp' }} me-2"></i>
+                    <span data-en="{{ promo.button_text_en }}" data-sw="{{ promo.button_text_sw }}">{{ promo.button_text_en }}</span>
                 </a>
             </div>
         </div>

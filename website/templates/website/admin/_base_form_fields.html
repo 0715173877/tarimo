@@ -1,0 +1,37 @@
+<!-- website/templates/website/admin/_base_form_fields.html -->
+{% if form.is_active or form.order %}
+<div class="row g-4 mb-4">
+    {% if form.is_active %}
+    <div class="col-md-6">
+        <div class="border rounded-4 p-4 bg-light">
+            <div class="form-check form-switch">
+                {{ form.is_active }}
+                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                    <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                    <span id="activeStatusText">
+                        {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                    </span>
+                </label>
+            </div>
+            {% if form.is_active.help_text %}
+            <div class="form-text text-muted mt-2">
+                <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if form.order %}
+    <div class="col-md-6">
+        <div class="border rounded-4 p-4 bg-light">
+            <label class="form-label fw-semibold">{{ form.order.label }}</label>
+            {{ form.order }}
+            {% if form.order.help_text %}
+            <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}

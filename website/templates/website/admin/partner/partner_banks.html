@@ -1,0 +1,351 @@
+<!-- website/templates/website/admin/partner_banks.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Partner Banks - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Partner Banks Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-bank2"></i></div>
+            <div>
+                <small class="text-muted">Total Banks</small>
+                <h3 class="mb-0 fw-bold">{{ banks.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <small class="text-muted">Active Banks</small>
+                <h3 class="mb-0 fw-bold">{{ banks.active.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-grid"></i></div>
+            <div>
+                <small class="text-muted">Categories</small>
+                <h3 class="mb-0 fw-bold">{{ banks.values|length }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ADD FORM -->
+<section class="section-card mb-4">
+    <h4 class="section-title mb-0">
+        <i class="bi bi-plus-circle gold-accent"></i> Quick Add Bank
+    </h4>
+    
+    <form method="POST" action="{% url 'website:admin_partner_bank_add' %}" class="mt-4">
+        {% csrf_token %}
+        <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-semibold">Bank Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g., CRDB, NMB, NBC" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Category (Optional)</label>
+                <select name="category" class="form-select">
+                    <option value="Commercial Bank">Commercial Bank</option>
+                    <option value="Microfinance">Microfinance</option>
+                    <option value="Community Bank">Community Bank</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-gold w-100">
+                    <i class="bi bi-plus-circle me-2"></i>Add Bank
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- PARTNER BANKS LIST -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-bank2 gold-accent"></i> Partner Banks List
+        </h4>
+        <span class="text-muted small">Total: {{ banks.count }} banks</span>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <!-- Grid View (Cards) -->
+    <div class="row g-4" id="gridView">
+        {% for bank in banks %}
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: 1.5rem;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="stat-icon" style="width: 50px; height: 50px;">
+                            <i class="bi bi-bank2"></i>
+                        </div>
+                        <div>
+                            {% if bank.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h5 class="card-title fw-bold mb-2">{{ bank.name }}</h5>
+                    <p class="text-muted small mb-3">{{ bank.category|default:"Commercial Bank" }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Order: {{ bank.order }}</small>
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteModal{{ bank.id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal{{ bank.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            Confirm Delete
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to remove <strong>{{ bank.name }}</strong> from partner banks?</p>
+                        <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="POST" action="{% url 'website:admin_partner_bank_delete' bank.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Remove Bank</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-bank2 display-4 text-muted"></i>
+            <p class="mt-3 text-muted">No partner banks added yet. Add your first bank above.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Table View (Alternative view) -->
+    {% if banks %}
+    <hr class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">List View</h5>
+        <button class="btn btn-sm btn-outline-gold" type="button" data-bs-toggle="collapse" data-bs-target="#tableView">
+            <i class="bi bi-chevron-down"></i> Toggle List
+        </button>
+    </div>
+    
+    <div class="collapse" id="tableView">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Bank Name</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Order</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bank in banks %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="fw-semibold">{{ bank.name }}</td>
+                        <td>{{ bank.category|default:"Commercial Bank" }}</td>
+                        <td>
+                            {% if bank.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ bank.order }}</td>
+                        <td>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal{{ bank.id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- BULK ACTIONS -->
+{% if banks %}
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-lightning-charge me-2 gold-accent"></i>Bulk Actions</h5>
+    
+    <div class="row g-3">
+        <div class="col-md-4">
+            <select class="form-select" id="bulkCategory">
+                <option value="">Select Category</option>
+                <option value="Commercial Bank">Commercial Bank</option>
+                <option value="Microfinance">Microfinance</option>
+                <option value="Community Bank">Community Bank</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-outline-gold w-100" id="applyCategory">
+                <i class="bi bi-check2-circle me-2"></i>Apply to Selected
+            </button>
+        </div>
+        <div class="col-md-5 text-end">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Select multiple banks by clicking on cards
+            </small>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- PREVIEW SECTION -->
+{% if banks %}
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>How It Appears on Website</h5>
+    
+    <div class="bg-light p-4 rounded-4">
+        <h6 class="mb-3">Partner Banks:</h6>
+        <div class="d-flex flex-wrap gap-2">
+            {% for bank in banks|slice:":8" %}
+            <span class="badge bg-white text-dark border p-3 rounded-3 shadow-sm">
+                <i class="bi bi-bank2 me-2 gold-accent"></i>
+                {{ bank.name }}
+            </span>
+            {% endfor %}
+            {% if banks.count > 8 %}
+            <span class="badge bg-white text-dark border p-3 rounded-3 shadow-sm">
+                +{{ banks.count|add:"-8" }} more
+            </span>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Select/Deselect cards
+    let selectedBanks = [];
+    
+    $('.card').click(function(e) {
+        if (!$(e.target).closest('button').length) {
+            $(this).toggleClass('border-gold');
+            $(this).toggleClass('shadow');
+            
+            let bankName = $(this).find('.card-title').text();
+            if ($(this).hasClass('border-gold')) {
+                selectedBanks.push(bankName);
+                toastr.info(`Selected: ${bankName}`);
+            } else {
+                selectedBanks = selectedBanks.filter(b => b !== bankName);
+                toastr.info(`Deselected: ${bankName}`);
+            }
+            
+            $('#selectedCount').text(selectedBanks.length);
+        }
+    });
+
+    // Apply category to selected banks
+    $('#applyCategory').click(function() {
+        let category = $('#bulkCategory').val();
+        if (!category) {
+            toastr.warning('Please select a category');
+            return;
+        }
+        
+        if (selectedBanks.length === 0) {
+            toastr.warning('No banks selected');
+            return;
+        }
+        
+        // Here you would make an AJAX call to update categories
+        toastr.success(`Applied "${category}" to ${selectedBanks.length} banks`);
+        
+        // Clear selection
+        $('.card').removeClass('border-gold shadow');
+        selectedBanks = [];
+    });
+
+    // Quick add form validation
+    $('form').submit(function(e) {
+        let bankName = $(this).find('input[name="name"]').val().trim();
+        if (!bankName) {
+            e.preventDefault();
+            toastr.error('Please enter a bank name');
+        }
+    });
+
+    // Search/filter functionality
+    $('#searchBank').on('input', function() {
+        let searchTerm = $(this).val().toLowerCase();
+        
+        $('.col-md-3').each(function() {
+            let bankName = $(this).find('.card-title').text().toLowerCase();
+            if (bankName.includes(searchTerm) || searchTerm === '') {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+});
+
+// Add search input to header if there are banks
+{% if banks %}
+$(document).ready(function() {
+    $('.section-card:first .d-flex').append(`
+        <div class="ms-auto">
+            <input type="text" class="form-control form-control-sm" id="searchBank" placeholder="Search banks..." style="width: 200px;">
+        </div>
+    `);
+});
+{% endif %}
+</script>
+
+<style>
+.border-gold {
+    border: 2px solid #f5b342 !important;
+}
+</style>
+{% endblock %}

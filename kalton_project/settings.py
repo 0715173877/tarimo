@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     
     # Local apps
     'website',
+    'django_sql_dashboard'
 ]
 
 MIDDLEWARE = [
@@ -71,6 +72,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+
+    'dashboard': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': '',  # Same database as default
+        'USER': '',  # You can use same user or create a read-only user
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'OPTIONS': {
+            'options': '-c default_transaction_read_only=on'  # Extra safety - prevents writes
+        },
     }
 }
 
@@ -126,3 +139,24 @@ CORS_ALLOWED_ORIGINS = [
 # Login URLs
 LOGIN_URL = 'website:admin_login'
 LOGIN_REDIRECT_URL = 'website:admin_panel'
+
+
+
+# settings.py
+
+DJANGO_SQL_DASHBOARD = {
+    "STAFF_ONLY": True,
+    "MAX_ROWS": 5000,
+    
+    # Only allow SELECT queries
+    "DISALLOWED_WORDS": [
+        "DROP", "DELETE", "UPDATE", "INSERT", 
+        "ALTER", "CREATE", "TRUNCATE", "REPLACE"
+    ],
+    
+    # Optional: Log all queries
+    "LOG_QUERIES": True,
+    
+    # Optional: Cache results for 5 minutes
+    "CACHE_TIMEOUT": 300,
+}

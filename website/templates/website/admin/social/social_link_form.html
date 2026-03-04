@@ -1,0 +1,434 @@
+<!-- website/templates/website/admin/social/social_link_form.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}{% if link %}Edit{% else %}Add{% endif %} Social Link - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}{% if link %}Edit{% else %}Add New{% endif %} Social Media Link{% endblock %}
+
+{% block content %}
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi {% if link %}bi-pencil-square{% else %}bi-plus-circle{% endif %} gold-accent"></i>
+            {% if link %}Edit: {{ link.get_platform_display }}{% else %}Create New Social Media Link{% endif %}
+        </h4>
+        <a href="{% url 'website:admin_social_links' %}" class="btn btn-outline-gold">
+            <i class="bi bi-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="socialLinkForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        {% if link %}
+        <div class="alert {% if link.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if link.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Link Status:</strong> 
+                {% if link.is_active %}
+                    <span class="badge bg-success">Active</span> - Visible on website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Hidden from website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Created: {{ link.created_at|date:"M d, Y" }} | Last updated: {{ link.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Left Column - Main Form Fields -->
+            <div class="col-md-8">
+                <!-- Active Status and Order Fields from BaseModel -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                                    <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                                    <span id="activeStatusText">
+                                        {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                            {{ form.order }}
+                            {% if form.order.help_text %}
+                            <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Platform Selection -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-grid me-1 gold-accent"></i> Platform <span class="text-danger">*</span>
+                    </label>
+                    {{ form.platform }}
+                    {% if form.platform.errors %}
+                        <div class="text-danger small mt-1">{{ form.platform.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Icon Class -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-emoji-smile me-1 gold-accent"></i> Icon Class <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" id="iconPreview">
+                            <i class="bi {{ form.icon.value|default:'bi-facebook' }}"></i>
+                        </span>
+                        {{ form.icon }}
+                    </div>
+                    {% if form.icon.errors %}
+                        <div class="text-danger small mt-1">{{ form.icon.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Bootstrap icon class (e.g., bi-facebook, bi-instagram, bi-twitter-x)</div>
+                </div>
+
+                <!-- URL -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-link-45deg me-1 gold-accent"></i> URL <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-globe"></i></span>
+                        {{ form.url }}
+                    </div>
+                    {% if form.url.errors %}
+                        <div class="text-danger small mt-1">{{ form.url.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Full URL including https://</div>
+                </div>
+            </div>
+
+            <!-- Right Column - Preview & Quick Actions -->
+            <div class="col-md-4">
+                <!-- Icon Preview Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-eye me-2 gold-accent"></i>Icon Preview
+                        </h6>
+                        
+                        <div class="bg-light p-4 rounded-3 mb-3">
+                            <div class="social-icon-large mx-auto mb-3" id="previewIconContainer">
+                                <i class="bi {{ form.icon.value|default:'bi-facebook' }}" id="previewIcon" style="font-size: 4rem; color: {% if form.platform.value == 'facebook' %}#1877f2{% elif form.platform.value == 'instagram' %}#e4405f{% elif form.platform.value == 'whatsapp' %}#25D366{% elif form.platform.value == 'twitter' %}#000000{% elif form.platform.value == 'linkedin' %}#0a66c2{% else %}#f5b342{% endif %};"></i>
+                            </div>
+                            <h5 id="previewPlatform">{{ link.get_platform_display|default:"Facebook" }}</h5>
+                            <p class="text-muted small" id="previewUrl">{{ link.url|default:"https://facebook.com/..."|truncatechars:30 }}</p>
+                        </div>
+
+                        <div class="bg-dark text-white p-3 rounded-3">
+                            <small class="opacity-75">Footer Preview</small>
+                            <div class="d-flex justify-content-center gap-3 mt-2">
+                                <div class="text-center">
+                                    <div class="social-icon-circle mb-1" style="background: rgba(255,255,255,0.1);">
+                                        <i class="bi {{ form.icon.value|default:'bi-facebook' }}"></i>
+                                    </div>
+                                    <small class="d-block opacity-75">Link</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-lightning-charge me-2 gold-accent"></i>Quick Actions
+                        </h6>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="testLink">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Test Link
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="suggestIcon">
+                                <i class="bi bi-magic me-1"></i>Suggest Icon
+                            </button>
+                            <hr class="my-2">
+                            <div class="small text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Platform icons auto-suggest based on selection
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Examples -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4 mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-info-circle fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Platform Examples</h6>
+                    <div class="row small">
+                        <div class="col-md-3">
+                            <strong>Facebook:</strong> https://facebook.com/username
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Instagram:</strong> https://instagram.com/username
+                        </div>
+                        <div class="col-md-3">
+                            <strong>WhatsApp:</strong> https://wa.me/255XXXXXXXXX
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Twitter/X:</strong> https://twitter.com/username
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <div>
+                {% if link %}
+                <button type="button" class="btn btn-outline-danger" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash me-2"></i>Delete Link
+                </button>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'website:admin_social_links' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-gold">
+                    <i class="bi bi-save me-2"></i>
+                    {% if link %}Update{% else %}Create{% endif %} Link
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Delete Modal -->
+{% if link %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the <strong>{{ link.get_platform_display }}</strong> link?</p>
+                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'website:admin_social_link_delete' link.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Link</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Platform to icon mapping
+    const platformIcons = {
+        'facebook': 'bi-facebook',
+        'instagram': 'bi-instagram',
+        'whatsapp': 'bi-whatsapp',
+        'twitter': 'bi-twitter-x',
+        'linkedin': 'bi-linkedin',
+        'youtube': 'bi-youtube',
+        'tiktok': 'bi-tiktok',
+        'telegram': 'bi-telegram'
+    };
+
+    const platformColors = {
+        'facebook': '#1877f2',
+        'instagram': '#e4405f',
+        'whatsapp': '#25D366',
+        'twitter': '#000000',
+        'linkedin': '#0a66c2',
+        'youtube': '#ff0000',
+        'tiktok': '#000000',
+        'telegram': '#0088cc'
+    };
+
+    // Toggle active status
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Update preview based on platform selection
+    $('#id_platform').on('change', function() {
+        var platform = $(this).val();
+        var icon = platformIcons[platform] || 'bi-' + platform;
+        var color = platformColors[platform] || '#f5b342';
+        
+        $('#id_icon').val(icon);
+        $('#iconPreview i').attr('class', 'bi ' + icon);
+        $('#previewIcon').attr('class', 'bi ' + icon).css('color', color);
+        $('#previewPlatform').text($('#id_platform option:selected').text());
+    });
+
+    // Manual icon input update
+    $('#id_icon').on('input', function() {
+        var icon = $(this).val();
+        $('#iconPreview i').attr('class', 'bi ' + icon);
+        $('#previewIcon').attr('class', 'bi ' + icon);
+    });
+
+    // URL preview update
+    $('#id_url').on('input', function() {
+        var url = $(this).val();
+        $('#previewUrl').text(url.substring(0, 30) + (url.length > 30 ? '...' : ''));
+    });
+
+    // Test link button
+    $('#testLink').click(function() {
+        var url = $('#id_url').val();
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            toastr.warning('Please enter a URL first');
+        }
+    });
+
+    // Suggest icon based on URL
+    $('#suggestIcon').click(function() {
+        var url = $('#id_url').val().toLowerCase();
+        var suggestedIcon = 'bi-link-45deg';
+        
+        if (url.includes('facebook') || url.includes('fb.com')) {
+            suggestedIcon = 'bi-facebook';
+            $('#id_platform').val('facebook');
+        } else if (url.includes('instagram')) {
+            suggestedIcon = 'bi-instagram';
+            $('#id_platform').val('instagram');
+        } else if (url.includes('wa.me') || url.includes('whatsapp')) {
+            suggestedIcon = 'bi-whatsapp';
+            $('#id_platform').val('whatsapp');
+        } else if (url.includes('twitter') || url.includes('x.com')) {
+            suggestedIcon = 'bi-twitter-x';
+            $('#id_platform').val('twitter');
+        } else if (url.includes('linkedin')) {
+            suggestedIcon = 'bi-linkedin';
+            $('#id_platform').val('linkedin');
+        } else if (url.includes('youtube')) {
+            suggestedIcon = 'bi-youtube';
+            $('#id_platform').val('youtube');
+        } else if (url.includes('tiktok')) {
+            suggestedIcon = 'bi-tiktok';
+            $('#id_platform').val('tiktok');
+        } else if (url.includes('telegram')) {
+            suggestedIcon = 'bi-telegram';
+            $('#id_platform').val('telegram');
+        }
+        
+        if (suggestedIcon !== 'bi-link-45deg') {
+            $('#id_icon').val(suggestedIcon);
+            $('#iconPreview i').attr('class', 'bi ' + suggestedIcon);
+            $('#previewIcon').attr('class', 'bi ' + suggestedIcon);
+            $('#id_platform').trigger('change');
+            toastr.success('Icon suggested based on URL!');
+        } else {
+            toastr.info('Could not detect platform from URL');
+        }
+    });
+
+    // Form validation
+    $('#socialLinkForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_platform').val()) {
+            toastr.error('Please select a platform');
+            isValid = false;
+        }
+        
+        if (!$('#id_icon').val().trim()) {
+            toastr.error('Icon class is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_url').val().trim()) {
+            toastr.error('URL is required');
+            isValid = false;
+        } else {
+            var url = $('#id_url').val();
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                toastr.error('URL must start with http:// or https://');
+                isValid = false;
+            }
+        }
+        
+        return isValid;
+    });
+});
+</script>
+
+<style>
+.social-icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-icon-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(245, 180, 66, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+{% endblock %}

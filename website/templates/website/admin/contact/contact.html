@@ -1,0 +1,524 @@
+<!-- website/templates/website/admin/contact/contact.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Contact Information - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Contact Information Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-telephone"></i></div>
+            <div>
+                <small class="text-muted">Phone</small>
+                <h3 class="mb-0 fw-bold">{{ contact.phone|default:"Not set" }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-whatsapp"></i></div>
+            <div>
+                <small class="text-muted">WhatsApp</small>
+                <h3 class="mb-0 fw-bold">{{ contact.whatsapp|default:"Not set" }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-envelope"></i></div>
+            <div>
+                <small class="text-muted">Email</small>
+                <h3 class="mb-0 fw-bold">{{ contact.email|default:"Not set" }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+            <div>
+                <small class="text-muted">Languages</small>
+                <h3 class="mb-0 fw-bold">EN / SW</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTACT FORM -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-envelope gold-accent"></i> Contact Details
+        </h4>
+        <button type="submit" form="contactForm" class="btn btn-gold">
+            <i class="bi bi-save me-2"></i>Save Changes
+        </button>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <form method="POST" id="contactForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        <div class="alert {% if contact.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if contact.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Contact Status:</strong> 
+                {% if contact.is_active %}
+                    <span class="badge bg-success">Active</span> - Contact information is visible on the website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Contact information is hidden from the website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Last updated: {{ contact.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - Main Contact Fields -->
+            <div class="col-md-8">
+                <!-- Active Status and Order Fields from BaseModel -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                                    <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                                    <span id="activeStatusText">
+                                        {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                            {{ form.order }}
+                            {% if form.order.help_text %}
+                            <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Numbers -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-telephone me-1 gold-accent"></i>Phone Number <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                            {{ form.phone }}
+                        </div>
+                        {% if form.phone.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Primary contact number</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-whatsapp me-1 gold-accent"></i>WhatsApp Number
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-whatsapp"></i></span>
+                            {{ form.whatsapp }}
+                        </div>
+                        {% if form.whatsapp.errors %}
+                            <div class="text-danger small mt-1">{{ form.whatsapp.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Optional: Separate WhatsApp number if different</div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-envelope me-1 gold-accent"></i>Email Address <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Working Hours (Bilingual) -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-clock me-1 gold-accent"></i>Working Hours (English) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.working_hours_en }}
+                        {% if form.working_hours_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.working_hours_en.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">e.g., Mon-Sat 8:00-20:00 | Sun 8:30-20:00</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-clock me-1 gold-accent"></i>Working Hours (Swahili) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.working_hours_sw }}
+                        {% if form.working_hours_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.working_hours_sw.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Mfano: Jumatatu-Jumamosi 8:00-20:00 | Jumapili 8:30-20:00</div>
+                    </div>
+                </div>
+
+                <!-- Notice (Bilingual) -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-info-circle me-1 gold-accent"></i>Notice (English)
+                        </label>
+                        {{ form.notice_en }}
+                        {% if form.notice_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.notice_en.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Optional: Additional information like "Calls accepted during working hours only"</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-info-circle me-1 gold-accent"></i>Notice (Swahili)
+                        </label>
+                        {{ form.notice_sw }}
+                        {% if form.notice_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.notice_sw.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Hiari: Maelezo ya ziada kama "Simu hupokelewa wakati wa saa za kazi tu"</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Preview & Info -->
+            <div class="col-md-4">
+                <!-- Contact Preview Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-eye me-2 gold-accent"></i>How It Will Appear
+                        </h6>
+                        
+                        <div class="bg-light p-3 rounded-3 mb-3">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-flag me-1 gold-accent"></i>English</h6>
+                            <p class="mb-1"><i class="bi bi-telephone me-2"></i> <span id="previewPhone">{{ contact.phone|default:"+255 XXX XXX XXX" }}</span></p>
+                            {% if contact.whatsapp %}
+                            <p class="mb-1"><i class="bi bi-whatsapp me-2"></i> <span id="previewWhatsapp">{{ contact.whatsapp }}</span></p>
+                            {% endif %}
+                            <p class="mb-1"><i class="bi bi-envelope me-2"></i> <span id="previewEmail">{{ contact.email|default:"email@example.com" }}</span></p>
+                            <p class="mb-1"><i class="bi bi-clock me-2"></i> <span id="previewHoursEn">{{ contact.working_hours_en|default:"Working hours" }}</span></p>
+                            {% if contact.notice_en %}
+                            <p class="mb-0 small text-muted mt-2"><i class="bi bi-info-circle me-1"></i> <span id="previewNoticeEn">{{ contact.notice_en }}</span></p>
+                            {% endif %}
+                        </div>
+
+                        <div class="bg-light p-3 rounded-3">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-flag me-1 gold-accent"></i>Swahili</h6>
+                            <p class="mb-1"><i class="bi bi-telephone me-2"></i> <span id="previewPhoneSw">{{ contact.phone|default:"+255 XXX XXX XXX" }}</span></p>
+                            {% if contact.whatsapp %}
+                            <p class="mb-1"><i class="bi bi-whatsapp me-2"></i> <span id="previewWhatsappSw">{{ contact.whatsapp }}</span></p>
+                            {% endif %}
+                            <p class="mb-1"><i class="bi bi-envelope me-2"></i> <span id="previewEmailSw">{{ contact.email|default:"email@example.com" }}</span></p>
+                            <p class="mb-1"><i class="bi bi-clock me-2"></i> <span id="previewHoursSw">{{ contact.working_hours_sw|default:"Saa za kazi" }}</span></p>
+                            {% if contact.notice_sw %}
+                            <p class="mb-0 small text-muted mt-2"><i class="bi bi-info-circle me-1"></i> <span id="previewNoticeSw">{{ contact.notice_sw }}</span></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-lightning-charge me-2 gold-accent"></i>Quick Actions
+                        </h6>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="copyPhone">
+                                <i class="bi bi-files me-1"></i>Copy Phone Number
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="copyEmail">
+                                <i class="bi bi-files me-1"></i>Copy Email Address
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="copyHours">
+                                <i class="bi bi-files me-1"></i>Copy Working Hours
+                            </button>
+                            <hr class="my-2">
+                            <a href="mailto:{{ contact.email }}" class="btn btn-outline-gold btn-sm" target="_blank">
+                                <i class="bi bi-send me-1"></i>Send Test Email
+                            </a>
+                            <a href="https://wa.me/{{ contact.whatsapp|cut:'+'|cut:' ' }}" class="btn btn-outline-gold btn-sm" target="_blank">
+                                <i class="bi bi-whatsapp me-1"></i>Open WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4 mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Copy English content to Swahili fields to get started.</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-gold me-2" id="copyHoursToSwahili">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Hours
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyNoticeToSwahili">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Notice
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end pt-3 border-top">
+            <button type="submit" class="btn btn-gold">
+                <i class="bi bi-save me-2"></i>Save All Changes
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Working Hours Preview -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-clock-history me-2 gold-accent"></i>Working Hours Display</h5>
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-sun me-2 gold-accent"></i>Weekdays</h6>
+                <div class="bg-light p-3 rounded-3">
+                    <p class="mb-2"><strong>English:</strong> <span id="previewWeekdayEn">{{ contact.working_hours_en|default:"Mon-Sat 8:00-20:00"|truncatechars:30 }}</span></p>
+                    <p class="mb-0"><strong>Swahili:</strong> <span id="previewWeekdaySw">{{ contact.working_hours_sw|default:"Jumatatu-Jumamosi 8:00-20:00"|truncatechars:30 }}</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-moon me-2 gold-accent"></i>Sunday</h6>
+                <div class="bg-light p-3 rounded-3">
+                    <p class="mb-2"><strong>English:</strong> <span id="previewSundayEn">{{ contact.working_hours_en|default:"Sun 8:30-20:00"|truncatechars:30 }}</span></p>
+                    <p class="mb-0"><strong>Swahili:</strong> <span id="previewSundaySw">{{ contact.working_hours_sw|default:"Jumapili 8:30-20:00"|truncatechars:30 }}</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle icon and text when checkbox changes
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Live preview updates
+    $('#id_phone').on('input', function() {
+        var val = $(this).val() || '+255 XXX XXX XXX';
+        $('#previewPhone').text(val);
+        $('#previewPhoneSw').text(val);
+    });
+
+    $('#id_whatsapp').on('input', function() {
+        var val = $(this).val() || '';
+        $('#previewWhatsapp').text(val);
+        $('#previewWhatsappSw').text(val);
+        
+        // Update WhatsApp link
+        if (val) {
+            var cleaned = val.replace(/[^0-9]/g, '');
+            $('#whatsappLink').attr('href', 'https://wa.me/' + cleaned);
+        }
+    });
+
+    $('#id_email').on('input', function() {
+        var val = $(this).val() || 'email@example.com';
+        $('#previewEmail').text(val);
+        $('#previewEmailSw').text(val);
+    });
+
+    $('#id_working_hours_en').on('input', function() {
+        var val = $(this).val() || 'Working hours';
+        $('#previewHoursEn').text(val);
+        
+        // Extract parts for separate previews
+        var parts = val.split('|');
+        if (parts.length > 0) {
+            $('#previewWeekdayEn').text(parts[0].trim());
+        }
+        if (parts.length > 1) {
+            $('#previewSundayEn').text(parts[1].trim());
+        }
+    });
+
+    $('#id_working_hours_sw').on('input', function() {
+        var val = $(this).val() || 'Saa za kazi';
+        $('#previewHoursSw').text(val);
+        
+        // Extract parts for separate previews
+        var parts = val.split('|');
+        if (parts.length > 0) {
+            $('#previewWeekdaySw').text(parts[0].trim());
+        }
+        if (parts.length > 1) {
+            $('#previewSundaySw').text(parts[1].trim());
+        }
+    });
+
+    $('#id_notice_en').on('input', function() {
+        $('#previewNoticeEn').text($(this).val() || '');
+    });
+
+    $('#id_notice_sw').on('input', function() {
+        $('#previewNoticeSw').text($(this).val() || '');
+    });
+
+    // Copy functions
+    $('#copyPhone').click(function() {
+        var phone = $('#id_phone').val();
+        if (phone) {
+            navigator.clipboard.writeText(phone).then(function() {
+                toastr.success('Phone number copied!');
+            });
+        } else {
+            toastr.warning('No phone number to copy');
+        }
+    });
+
+    $('#copyEmail').click(function() {
+        var email = $('#id_email').val();
+        if (email) {
+            navigator.clipboard.writeText(email).then(function() {
+                toastr.success('Email address copied!');
+            });
+        } else {
+            toastr.warning('No email to copy');
+        }
+    });
+
+    $('#copyHours').click(function() {
+        var hours = $('#id_working_hours_en').val();
+        if (hours) {
+            navigator.clipboard.writeText(hours).then(function() {
+                toastr.success('Working hours copied!');
+            });
+        } else {
+            toastr.warning('No working hours to copy');
+        }
+    });
+
+    // Translation helpers
+    $('#copyHoursToSwahili').click(function() {
+        var enHours = $('#id_working_hours_en').val();
+        if (enHours && !$('#id_working_hours_sw').val()) {
+            $('#id_working_hours_sw').val(enHours);
+            $('#id_working_hours_sw').trigger('input');
+            toastr.success('Working hours copied to Swahili!');
+        } else if (!enHours) {
+            toastr.warning('Please enter English hours first');
+        } else {
+            toastr.warning('Swahili hours field is not empty');
+        }
+    });
+
+    $('#copyNoticeToSwahili').click(function() {
+        var enNotice = $('#id_notice_en').val();
+        if (enNotice && !$('#id_notice_sw').val()) {
+            $('#id_notice_sw').val(enNotice);
+            $('#id_notice_sw').trigger('input');
+            toastr.success('Notice copied to Swahili!');
+        } else if (!enNotice) {
+            toastr.warning('Please enter English notice first');
+        } else {
+            toastr.warning('Swahili notice field is not empty');
+        }
+    });
+
+    // Form validation
+    $('#contactForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_phone').val().trim()) {
+            toastr.error('Phone number is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_email').val().trim()) {
+            toastr.error('Email address is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_working_hours_en').val().trim()) {
+            toastr.error('Working hours in English are required');
+            isValid = false;
+        }
+        
+        if (!$('#id_working_hours_sw').val().trim()) {
+            toastr.error('Working hours in Swahili are required');
+            isValid = false;
+        }
+        
+        // Email validation
+        var email = $('#id_email').val();
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            toastr.error('Please enter a valid email address');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}

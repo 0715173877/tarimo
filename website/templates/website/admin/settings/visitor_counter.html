@@ -1,0 +1,476 @@
+<!-- website/templates/website/admin/settings/visitor_counter.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Visitor Counter - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Visitor Counter Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-people"></i></div>
+            <div>
+                <small class="text-muted">Current Count</small>
+                <h3 class="mb-0 fw-bold">{{ form.count.value|default:"1,234" }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-arrow-up"></i></div>
+            <div>
+                <small class="text-muted">Today's Growth</small>
+                <h3 class="mb-0 fw-bold text-success">+12%</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+            <div>
+                <small class="text-muted">Languages</small>
+                <h3 class="mb-0 fw-bold">EN / SW</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN COUNTER FORM -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-people gold-accent"></i> Visitor Counter Settings
+        </h4>
+        <button type="submit" form="counterForm" class="btn btn-gold">
+            <i class="bi bi-save me-2"></i>Save Changes
+        </button>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <form method="POST" id="counterForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        <div class="alert {% if counter.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if counter.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Counter Status:</strong> 
+                {% if counter.is_active %}
+                    <span class="badge bg-success">Active</span> - Counter is visible on the website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Counter is hidden from the website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Last updated: {{ counter.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - Counter Settings -->
+            <div class="col-md-8">
+                <!-- Active Status and Order Fields from BaseModel -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                                    <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                                    <span id="activeStatusText">
+                                        {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                            {{ form.order }}
+                            {% if form.order.help_text %}
+                            <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Counter Value -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-123 me-1 gold-accent"></i> Visitor Count <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
+                        {{ form.count }}
+                        <span class="input-group-text bg-light">visitors</span>
+                    </div>
+                    {% if form.count.errors %}
+                        <div class="text-danger small mt-1">{{ form.count.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">Current number of website visitors</div>
+                </div>
+
+                <!-- Text (English) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-flag me-1 gold-accent"></i> Counter Text (English) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.text_en }}
+                    {% if form.text_en.errors %}
+                        <div class="text-danger small mt-1">{{ form.text_en.errors }}</div>
+                    {% endif %}
+                    <div class="d-flex justify-content-end mt-1">
+                        <span class="badge bg-light text-dark" id="enTextCount">0/50</span>
+                    </div>
+                    <div class="form-text">e.g., "and counting..." or "visitors and counting"</div>
+                </div>
+
+                <!-- Text (Swahili) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-flag me-1 gold-accent"></i> Counter Text (Swahili) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.text_sw }}
+                    {% if form.text_sw.errors %}
+                        <div class="text-danger small mt-1">{{ form.text_sw.errors }}</div>
+                    {% endif %}
+                    <div class="d-flex justify-content-end mt-1">
+                        <span class="badge bg-light text-dark" id="swTextCount">0/50</span>
+                    </div>
+                    <div class="form-text">Mfano: "na zinaendelea..." au "wageni na zinaendelea"</div>
+                </div>
+            </div>
+
+            <!-- Right Column - Preview & Quick Actions -->
+            <div class="col-md-4">
+                <!-- Counter Preview Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-eye me-2 gold-accent"></i>Live Preview
+                        </h6>
+                        
+                        <!-- English Preview -->
+                        <div class="bg-light p-4 rounded-3 mb-3 text-center">
+                            <div class="display-4 fw-bold gold-accent" id="previewCount">{{ form.count.value|default:"1,234" }}</div>
+                            <p class="text-muted mb-0" id="previewTextEn">{{ form.text_en.value|default:"and counting..." }}</p>
+                        </div>
+
+                        <!-- Swahili Preview -->
+                        <div class="bg-light p-4 rounded-3 text-center">
+                            <div class="display-4 fw-bold gold-accent">{{ form.count.value|default:"1,234" }}</div>
+                            <p class="text-muted mb-0" id="previewTextSw">{{ form.text_sw.value|default:"na zinaendelea..." }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-lightning-charge me-2 gold-accent"></i>Quick Actions
+                        </h6>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="incrementCounter">
+                                <i class="bi bi-plus-circle me-1"></i>Increment by 1
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="incrementBy100">
+                                <i class="bi bi-plus-circle me-1"></i>Increment by 100
+                            </button>
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="resetCounter">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Default
+                            </button>
+                            <hr class="my-2">
+                            <button type="button" class="btn btn-outline-gold btn-sm" id="copyEnglishToSwahili">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Copy Text to Swahili
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end pt-3 border-top mt-4">
+            <button type="submit" class="btn btn-gold">
+                <i class="bi bi-save me-2"></i>Save Changes
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Analytics Preview -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-graph-up me-2 gold-accent"></i>Traffic Analytics Preview</h5>
+    
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="bg-light p-4 rounded-4">
+                <canvas id="visitorChart" style="width: 100%; height: 200px;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-light p-4 rounded-4">
+                <h6 class="fw-semibold mb-3">Quick Stats</h6>
+                <div class="mb-3">
+                    <small class="text-muted d-block">Daily Average</small>
+                    <span class="fw-bold">~150 visitors</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block">Peak Time</small>
+                    <span class="fw-bold">10:00 - 14:00</span>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Most Active Day</small>
+                    <span class="fw-bold">Monday</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Appears Section -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>How It Appears on Website</h5>
+    
+    <div class="bg-dark text-white p-4 rounded-4" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="small opacity-75 mb-1">Website Visitors</p>
+                <div class="d-flex align-items-baseline">
+                    <span class="display-3 fw-bold me-2" id="footerPreviewCount">{{ form.count.value|default:"1,234" }}</span>
+                    <span class="opacity-75" id="footerPreviewTextEn">{{ form.text_en.value|default:"and counting..." }}</span>
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="d-flex align-items-baseline justify-content-md-end">
+                    <span class="display-3 fw-bold me-2">{{ form.count.value|default:"1,234" }}</span>
+                    <span class="opacity-75" id="footerPreviewTextSw">{{ form.text_sw.value|default:"na zinaendelea..." }}</span>
+                </div>
+                <p class="small opacity-75 mt-1">Wageni wa Tovuti</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Chart.js for analytics preview -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Character counters
+    function updateCharCount(field, counterId, maxLength) {
+        $(field).on('input', function() {
+            var count = $(this).val().length;
+            $(counterId).text(count + '/' + maxLength);
+            if (count > maxLength) {
+                $(counterId).addClass('bg-danger text-white');
+            } else {
+                $(counterId).removeClass('bg-danger text-white');
+            }
+        });
+        var initialCount = $(field).val().length;
+        $(counterId).text(initialCount + '/50');
+    }
+
+    updateCharCount('#id_text_en', '#enTextCount', 50);
+    updateCharCount('#id_text_sw', '#swTextCount', 50);
+
+    // Toggle active status
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Format number with commas
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Update previews
+    function updatePreviews() {
+        var count = $('#id_count').val() || 1234;
+        var formattedCount = formatNumber(count);
+        $('#previewCount').text(formattedCount);
+        $('.display-4.fw-bold').each(function() {
+            $(this).text(formattedCount);
+        });
+        $('#footerPreviewCount').text(formattedCount);
+    }
+
+    $('#id_count').on('input', function() {
+        updatePreviews();
+    });
+
+    $('#id_text_en').on('input', function() {
+        var text = $(this).val() || 'and counting...';
+        $('#previewTextEn').text(text);
+        $('#footerPreviewTextEn').text(text);
+    });
+
+    $('#id_text_sw').on('input', function() {
+        var text = $(this).val() || 'na zinaendelea...';
+        $('#previewTextSw').text(text);
+        $('#footerPreviewTextSw').text(text);
+    });
+
+    // Quick actions
+    $('#incrementCounter').click(function() {
+        var currentVal = parseInt($('#id_count').val()) || 0;
+        $('#id_count').val(currentVal + 1);
+        updatePreviews();
+        toastr.success('Counter incremented by 1');
+    });
+
+    $('#incrementBy100').click(function() {
+        var currentVal = parseInt($('#id_count').val()) || 0;
+        $('#id_count').val(currentVal + 100);
+        updatePreviews();
+        toastr.success('Counter incremented by 100');
+    });
+
+    $('#resetCounter').click(function() {
+        $('#id_count').val(1234);
+        updatePreviews();
+        toastr.info('Counter reset to default');
+    });
+
+    $('#copyEnglishToSwahili').click(function() {
+        var enText = $('#id_text_en').val();
+        if (enText && !$('#id_text_sw').val()) {
+            $('#id_text_sw').val(enText);
+            $('#swTextCount').text(enText.length + '/50');
+            $('#previewTextSw').text(enText);
+            $('#footerPreviewTextSw').text(enText);
+            toastr.success('Text copied to Swahili!');
+        } else if (!enText) {
+            toastr.warning('Please enter English text first');
+        } else {
+            toastr.warning('Swahili text field is not empty');
+        }
+    });
+
+    // Form validation
+    $('#counterForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_count').val()) {
+            toastr.error('Visitor count is required');
+            isValid = false;
+        } else if (parseInt($('#id_count').val()) < 0) {
+            toastr.error('Visitor count cannot be negative');
+            isValid = false;
+        }
+        
+        if (!$('#id_text_en').val().trim()) {
+            toastr.error('English text is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_text_sw').val().trim()) {
+            toastr.error('Swahili text is required');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+
+    // Initialize chart
+    var ctx = document.getElementById('visitorChart').getContext('2d');
+    var visitorChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Visitors',
+                data: [120, 135, 142, 158, 165, 180, 145],
+                borderColor: '#f5b342',
+                backgroundColor: 'rgba(245, 180, 66, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+/* Chart container */
+#visitorChart {
+    max-height: 200px;
+}
+
+/* Counter preview styling */
+.display-4 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Gold accent for numbers */
+.gold-accent {
+    color: #f5b342;
+}
+
+/* Dark preview section */
+.bg-dark {
+    background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%) !important;
+}
+</style>
+{% endblock %}

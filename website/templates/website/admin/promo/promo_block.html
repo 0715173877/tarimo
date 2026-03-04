@@ -1,0 +1,449 @@
+<!-- website/templates/website/admin/promo/promo_block.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Promotional Block - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Promotional Block Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-megaphone"></i></div>
+            <div>
+                <small class="text-muted">Status</small>
+                <h3 class="mb-0 fw-bold">
+                    {% if promo.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+            <div>
+                <small class="text-muted">Languages</small>
+                <h3 class="mb-0 fw-bold">EN / SW</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-palette"></i></div>
+            <div>
+                <small class="text-muted">Colors</small>
+                <h3 class="mb-0 fw-bold">Custom</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-grid"></i></div>
+            <div>
+                <small class="text-muted">Order</small>
+                <h3 class="mb-0 fw-bold">{{ promo.order|default:"0" }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN FORM -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-megaphone gold-accent"></i> Promotional Block Content
+        </h4>
+        <button type="submit" form="promoForm" class="btn btn-gold">
+            <i class="bi bi-save me-2"></i>Save Changes
+        </button>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <form method="POST" id="promoForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        <div class="alert {% if promo.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if promo.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Block Status:</strong> 
+                {% if promo.is_active %}
+                    <span class="badge bg-success">Active</span> - Visible on website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Hidden from website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Last updated: {{ promo.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+
+        <!-- Active Status and Order -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                            <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                            <span id="activeStatusText">
+                                {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                    {{ form.order }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Settings -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Background Color</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-brush"></i></span>
+                    {{ form.background_color }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Text Color</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-type"></i></span>
+                    {{ form.text_color }}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Accent Color (Title)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-star"></i></span>
+                    {{ form.accent_color }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Title (Bilingual) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-flag me-1 gold-accent"></i> Title (English) <span class="text-danger">*</span>
+                </label>
+                {{ form.title_en }}
+                {% if form.title_en.errors %}
+                    <div class="text-danger small mt-1">{{ form.title_en.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-flag me-1 gold-accent"></i> Title (Swahili) <span class="text-danger">*</span>
+                </label>
+                {{ form.title_sw }}
+                {% if form.title_sw.errors %}
+                    <div class="text-danger small mt-1">{{ form.title_sw.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Description (Bilingual) -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-text-paragraph me-1 gold-accent"></i> Description (English) <span class="text-danger">*</span>
+                </label>
+                {{ form.description_en }}
+                {% if form.description_en.errors %}
+                    <div class="text-danger small mt-1">{{ form.description_en.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-text-paragraph me-1 gold-accent"></i> Description (Swahili) <span class="text-danger">*</span>
+                </label>
+                {{ form.description_sw }}
+                {% if form.description_sw.errors %}
+                    <div class="text-danger small mt-1">{{ form.description_sw.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Button Settings -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Button Text (EN)</label>
+                {{ form.button_text_en }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Button Text (SW)</label>
+                {{ form.button_text_sw }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Button Link</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-link"></i></span>
+                    {{ form.button_link }}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Button Icon</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-{{ form.button_icon.value|default:'whatsapp' }}"></i></span>
+                    {{ form.button_icon }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Copy English content to Swahili fields.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyTitle">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Title
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyDescription">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Description
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyButton">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Button
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end pt-3 border-top">
+            <button type="submit" class="btn btn-gold">
+                <i class="bi bi-save me-2"></i>Save Changes
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- LIVE PREVIEW SECTION -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>Live Preview</h5>
+    
+    <div class="preview-block my-5 p-4 rounded-4" id="previewBlock" style="background-color: {{ promo.background_color|default:'#0b1423' }};">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 style="font-family:'Playfair Display'; font-size:2.5rem; color:{{ promo.accent_color|default:'#f5b342' }};" id="previewTitleEn">
+                    {{ promo.title_en|default:"YOUR TRUSTED BANKING & MOBILE MONEY AGENT" }}
+                </h3>
+                <p class="fs-4 mb-0" style="color:{{ promo.text_color|default:'#ffffff' }};" id="previewDescEn">
+                    {{ promo.description_en|default:"Banking, mobile money and international money transfers – Nzuguni, Dodoma" }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{{ promo.button_link|default:'#contact' }}" class="btn btn-outline-gold btn-lg" id="previewButton">
+                    <i class="bi {{ promo.button_icon|default:'bi-whatsapp' }} me-2"></i>
+                    <span id="previewButtonEn">{{ promo.button_text_en|default:"Contact Us" }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Swahili Preview Toggle -->
+    <div class="form-check form-switch mt-3">
+        <input class="form-check-input" type="checkbox" id="toggleSwahili">
+        <label class="form-check-label" for="toggleSwahili">Show Swahili Version</label>
+    </div>
+
+    <div class="preview-block my-5 p-4 rounded-4" id="previewBlockSw" style="background-color: {{ promo.background_color|default:'#0b1423' }}; display: none;">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 style="font-family:'Playfair Display'; font-size:2.5rem; color:{{ promo.accent_color|default:'#f5b342' }};" id="previewTitleSw">
+                    {{ promo.title_sw|default:"WAKALA WAKO WA BENKI NA PESA KWA SIMU" }}
+                </h3>
+                <p class="fs-4 mb-0" style="color:{{ promo.text_color|default:'#ffffff' }};" id="previewDescSw">
+                    {{ promo.description_sw|default:"Huduma za kibenki, mitandao ya simu na uhamisho wa fedha kimataifa – Nzuguni, Dodoma" }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{{ promo.button_link|default:'#contact' }}" class="btn btn-outline-gold btn-lg">
+                    <i class="bi {{ promo.button_icon|default:'bi-whatsapp' }} me-2"></i>
+                    <span id="previewButtonSw">{{ promo.button_text_sw|default:"Wasiliana Nasi" }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle active status
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Color picker preview
+    $('#id_background_color, #id_text_color, #id_accent_color').on('input', function() {
+        var bgColor = $('#id_background_color').val();
+        var textColor = $('#id_text_color').val();
+        var accentColor = $('#id_accent_color').val();
+        
+        $('#previewBlock').css('background-color', bgColor);
+        $('#previewBlockSw').css('background-color', bgColor);
+        $('#previewBlock h3').css('color', accentColor);
+        $('#previewBlockSw h3').css('color', accentColor);
+        $('#previewBlock p').css('color', textColor);
+        $('#previewBlockSw p').css('color', textColor);
+    });
+
+    // Live preview updates - English
+    $('#id_title_en').on('input', function() {
+        $('#previewTitleEn').text($(this).val() || 'YOUR TRUSTED BANKING & MOBILE MONEY AGENT');
+    });
+
+    $('#id_description_en').on('input', function() {
+        $('#previewDescEn').text($(this).val() || 'Banking, mobile money and international money transfers – Nzuguni, Dodoma');
+    });
+
+    $('#id_button_text_en').on('input', function() {
+        $('#previewButtonEn').text($(this).val() || 'Contact Us');
+    });
+
+    // Live preview updates - Swahili
+    $('#id_title_sw').on('input', function() {
+        $('#previewTitleSw').text($(this).val() || 'WAKALA WAKO WA BENKI NA PESA KWA SIMU');
+    });
+
+    $('#id_description_sw').on('input', function() {
+        $('#previewDescSw').text($(this).val() || 'Huduma za kibenki, mitandao ya simu na uhamisho wa fedha kimataifa – Nzuguni, Dodoma');
+    });
+
+    $('#id_button_text_sw').on('input', function() {
+        $('#previewButtonSw').text($(this).val() || 'Wasiliana Nasi');
+    });
+
+    // Button link and icon
+    $('#id_button_link').on('input', function() {
+        var link = $(this).val() || '#contact';
+        $('#previewBlock a, #previewBlockSw a').attr('href', link);
+    });
+
+    $('#id_button_icon').on('input', function() {
+        var icon = $(this).val() || 'bi-whatsapp';
+        $('#previewBlock a i, #previewBlockSw a i').attr('class', 'bi ' + icon + ' me-2');
+    });
+
+    // Toggle Swahili preview
+    $('#toggleSwahili').change(function() {
+        if ($(this).is(':checked')) {
+            $('#previewBlock').hide();
+            $('#previewBlockSw').show();
+        } else {
+            $('#previewBlock').show();
+            $('#previewBlockSw').hide();
+        }
+    });
+
+    // Translation helpers
+    $('#copyTitle').click(function() {
+        var enTitle = $('#id_title_en').val();
+        if (enTitle && !$('#id_title_sw').val()) {
+            $('#id_title_sw').val(enTitle);
+            $('#previewTitleSw').text(enTitle);
+            toastr.success('Title copied to Swahili!');
+        } else if (!enTitle) {
+            toastr.warning('Please enter English title first');
+        } else {
+            toastr.warning('Swahili title field is not empty');
+        }
+    });
+
+    $('#copyDescription').click(function() {
+        var enDesc = $('#id_description_en').val();
+        if (enDesc && !$('#id_description_sw').val()) {
+            $('#id_description_sw').val(enDesc);
+            $('#previewDescSw').text(enDesc);
+            toastr.success('Description copied to Swahili!');
+        } else if (!enDesc) {
+            toastr.warning('Please enter English description first');
+        } else {
+            toastr.warning('Swahili description field is not empty');
+        }
+    });
+
+    $('#copyButton').click(function() {
+        var enButton = $('#id_button_text_en').val();
+        if (enButton && !$('#id_button_text_sw').val()) {
+            $('#id_button_text_sw').val(enButton);
+            $('#previewButtonSw').text(enButton);
+            toastr.success('Button text copied to Swahili!');
+        } else if (!enButton) {
+            toastr.warning('Please enter English button text first');
+        } else {
+            toastr.warning('Swahili button text field is not empty');
+        }
+    });
+
+    // Form validation
+    $('#promoForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_title_en').val().trim()) {
+            toastr.error('English title is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_title_sw').val().trim()) {
+            toastr.error('Swahili title is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_description_en').val().trim()) {
+            toastr.error('English description is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_description_sw').val().trim()) {
+            toastr.error('Swahili description is required');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}

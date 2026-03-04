@@ -1,0 +1,259 @@
+<!-- website/templates/website/admin/social/social_links.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Social Media Links - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Social Media Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-share"></i></div>
+            <div>
+                <small class="text-muted">Total Links</small>
+                <h3 class="mb-0 fw-bold">{{ links.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <small class="text-muted">Active</small>
+                <h3 class="mb-0 fw-bold">{{ links.active.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-grid"></i></div>
+            <div>
+                <small class="text-muted">Platforms</small>
+                <h3 class="mb-0 fw-bold">{{ links.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-arrow-up-right-circle"></i></div>
+            <div>
+                <small class="text-muted">Click Tracking</small>
+                <h3 class="mb-0 fw-bold">Enabled</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SOCIAL LINKS LIST -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-share gold-accent"></i> Social Media Links
+        </h4>
+        <a href="{% url 'website:admin_social_link_add' %}" class="btn btn-gold">
+            <i class="bi bi-plus-circle me-2"></i>Add New Link
+        </a>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <div class="table-custom table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Platform</th>
+                    <th>Icon</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sortable-links">
+                {% for link in links %}
+                <tr data-id="{{ link.id }}">
+                    <td>
+                        <i class="bi bi-grip-vertical drag-handle" style="cursor: grab;"></i>
+                    </td>
+                    <td>
+                        <span class="fw-semibold">{{ link.get_platform_display }}</span>
+                    </td>
+                    <td>
+                        <div class="social-icon-circle" style="background: {% cycle 'rgba(245, 180, 66, 0.1)' 'rgba(24, 119, 242, 0.1)' 'rgba(225, 48, 108, 0.1)' 'rgba(37, 211, 102, 0.1)' %}">
+                            <i class="bi {{ link.icon }} fs-5" style="color: {% if link.platform == 'facebook' %}#1877f2{% elif link.platform == 'instagram' %}#e4405f{% elif link.platform == 'whatsapp' %}#25D366{% elif link.platform == 'twitter' %}#000000{% elif link.platform == 'linkedin' %}#0a66c2{% else %}#f5b342{% endif %};"></i>
+                        </div>
+                    </td>
+                    <td>
+                        <a href="{{ link.url }}" target="_blank" class="text-muted small">
+                            {{ link.url|truncatechars:30 }}
+                            <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                    </td>
+                    <td>
+                        {% if link.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ link.order }}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'website:admin_social_link_edit' link.id %}" 
+                               class="btn btn-sm btn-outline-gold me-1" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal{{ link.id }}"
+                                    title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal{{ link.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                    Confirm Delete
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete the <strong>{{ link.get_platform_display }}</strong> link?</p>
+                                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form method="POST" action="{% url 'website:admin_social_link_delete' link.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete Link</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="bi bi-share display-4 text-muted"></i>
+                        <p class="mt-3 text-muted">No social media links added yet. Click "Add New Link" to create one.</p>
+                        <a href="{% url 'website:admin_social_link_add' %}" class="btn btn-gold mt-2">
+                            <i class="bi bi-plus-circle me-2"></i>Add First Link
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if links %}
+    <p class="text-muted small mt-3">
+        <i class="bi bi-info-circle me-1"></i> 
+        Drag the <i class="bi bi-grip-vertical"></i> handle to reorder links. Changes are saved automatically.
+    </p>
+    {% endif %}
+</section>
+
+<!-- PREVIEW SECTION -->
+{% if links %}
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>Live Preview (Footer Display)</h5>
+    
+    <div class="bg-dark text-white p-4 rounded-4" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+        <div class="d-flex justify-content-center gap-4">
+            {% for link in links|slice:":5" %}
+            <a href="{{ link.url }}" target="_blank" class="text-white text-decoration-none">
+                <div class="text-center">
+                    <div class="social-icon-circle mb-2" style="width: 50px; height: 50px; background: rgba(255,255,255,0.1);">
+                        <i class="bi {{ link.icon }} fs-4"></i>
+                    </div>
+                    <small class="d-block opacity-75">{{ link.get_platform_display }}</small>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- PLATFORM COVERAGE -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-pie-chart me-2 gold-accent"></i>Platform Coverage</h5>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="bg-light p-4 rounded-4">
+                <h6 class="fw-semibold mb-3">Available Platforms</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-facebook me-1" style="color: #1877f2;"></i> Facebook
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-instagram me-1" style="color: #e4405f;"></i> Instagram
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-whatsapp me-1" style="color: #25D366;"></i> WhatsApp
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-twitter-x me-1"></i> Twitter/X
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-linkedin me-1" style="color: #0a66c2;"></i> LinkedIn
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-youtube me-1" style="color: #ff0000;"></i> YouTube
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-tiktok me-1"></i> TikTok
+                    </span>
+                    <span class="badge bg-white text-dark border p-2">
+                        <i class="bi bi-telegram me-1" style="color: #0088cc;"></i> Telegram
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-light p-4 rounded-4">
+                <h6 class="fw-semibold mb-3">Quick Stats</h6>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>Facebook</small>
+                        <small class="fw-bold">{% if links.facebook %}✅{% else %}❌{% endif %}</small>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>Instagram</small>
+                        <small class="fw-bold">{% if links.instagram %}✅{% else %}❌{% endif %}</small>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>WhatsApp</small>
+                        <small class="fw-bold">{% if links.whatsapp %}✅{% else %}❌{% endif %}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+{% endblock %}

@@ -239,6 +239,33 @@ class SocialMediaLink(BaseModel):
         
     def __str__(self):
         return self.platform
+    
+
+# website/models.py
+
+class PromoBlock(BaseModel):
+    """Promotional block for bilingual content"""
+    title_en = models.CharField(max_length=200, default="YOUR TRUSTED BANKING & MOBILE MONEY AGENT")
+    title_sw = models.CharField(max_length=200, default="WAKALA WAKO WA BENKI NA PESA KWA SIMU")
+    
+    description_en = models.CharField(max_length=300, default="Banking, mobile money and international money transfers – Nzuguni, Dodoma")
+    description_sw = models.CharField(max_length=300, default="Huduma za kibenki, mitandao ya simu na uhamisho wa fedha kimataifa – Nzuguni, Dodoma")
+    
+    button_text_en = models.CharField(max_length=50, default="Contact Us")
+    button_text_sw = models.CharField(max_length=50, default="Wasiliana Nasi")
+    button_link = models.CharField(max_length=200, default="#contact", help_text="URL or anchor link")
+    button_icon = models.CharField(max_length=50, default="bi-whatsapp", help_text="Bootstrap icon class")
+    
+    background_color = models.CharField(max_length=20, default="#0b1423", help_text="Background color code")
+    text_color = models.CharField(max_length=20, default="#ffffff", help_text="Text color code")
+    accent_color = models.CharField(max_length=20, default="#f5b342", help_text="Accent color for title")
+    
+    class Meta:
+        verbose_name = "Promotional Block"
+        verbose_name_plural = "Promotional Blocks"
+        
+    def __str__(self):
+        return f"Promo Block: {self.title_en[:30]}"
 
 class WebsiteSetting(models.Model):
     """Global website settings"""

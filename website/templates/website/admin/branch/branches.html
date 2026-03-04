@@ -1,0 +1,215 @@
+<!-- website/templates/website/admin/branches.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Branches - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Branches Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-building"></i></div>
+            <div>
+                <small class="text-muted">Total Branches</small>
+                <h3 class="mb-0 fw-bold">{{ branches.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-star-fill"></i></div>
+            <div>
+                <small class="text-muted">Main Branch</small>
+                <h3 class="mb-0 fw-bold">
+                    {% with main_branch=branches.filter.is_main.first %}
+                        {% if main_branch %}1{% else %}0{% endif %}
+                    {% endwith %}
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-clock"></i></div>
+            <div>
+                <small class="text-muted">Coming Soon</small>
+                <h3 class="mb-0 fw-bold">{{ branches.coming_soon.count }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <small class="text-muted">Active</small>
+                <h3 class="mb-0 fw-bold">{{ branches.active.count }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BRANCHES LIST -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-building gold-accent"></i> All Branches
+        </h4>
+        <a href="{% url 'website:admin_branch_add' %}" class="btn btn-gold">
+            <i class="bi bi-plus-circle me-2"></i>Add New Branch
+        </a>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <div class="table-custom table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Branch</th>
+                    <th>Name (EN)</th>
+                    <th>Name (SW)</th>
+                    <th>Address</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Order</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for branch in branches %}
+                <tr>
+                    <td>
+                        {% if branch.is_main %}
+                            <i class="bi bi-star-fill text-warning" title="Main Branch"></i>
+                        {% else %}
+                            {{ forloop.counter }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi {% if branch.is_coming_soon %}bi-clock{% else %}bi-building{% endif %} gold-accent"></i>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="fw-semibold">{{ branch.name_en }}</td>
+                    <td>{{ branch.name_sw }}</td>
+                    <td>
+                        <span class="small">{{ branch.address_en|truncatechars:50 }}</span>
+                    </td>
+                    <td>
+                        {% if branch.phone %}
+                            <span class="small">{{ branch.phone }}</span>
+                        {% else %}
+                            <span class="text-muted small">Not set</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if branch.is_main %}
+                            <span class="badge bg-warning text-dark">Main</span>
+                        {% endif %}
+                        {% if branch.is_coming_soon %}
+                            <span class="badge bg-info">Coming Soon</span>
+                        {% endif %}
+                        {% if branch.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ branch.order }}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'website:admin_branch_edit' branch.id %}" 
+                               class="btn btn-sm btn-outline-gold me-1" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal{{ branch.id }}"
+                                    title="Delete"
+                                    {% if branch.is_main %}disabled{% endif %}>
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal{{ branch.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                    Confirm Delete
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete the branch "<strong>{{ branch.name_en }}</strong>"?</p>
+                                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form method="POST" action="{% url 'website:admin_branch_delete' branch.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete Branch</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5">
+                        <i class="bi bi-building display-4 text-muted"></i>
+                        <p class="mt-3 text-muted">No branches found. Click "Add New Branch" to create one.</p>
+                        <a href="{% url 'website:admin_branch_add' %}" class="btn btn-gold mt-2">
+                            <i class="bi bi-plus-circle me-2"></i>Add First Branch
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- MAP PREVIEW SECTION (if branches have coordinates) -->
+{% if branches.has_coordinates %}
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-map me-2 gold-accent"></i>Branch Locations Map</h5>
+    <div class="bg-light rounded-4 p-3" style="height: 300px;">
+        <!-- You can integrate Google Maps here later -->
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <p class="text-muted">Map integration coming soon</p>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

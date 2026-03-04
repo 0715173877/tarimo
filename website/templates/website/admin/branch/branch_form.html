@@ -1,0 +1,515 @@
+<!-- website/templates/website/admin/branch_form.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}{% if branch %}Edit{% else %}Add{% endif %} Branch - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}{% if branch %}Edit{% else %}Add New{% endif %} Branch{% endblock %}
+
+{% block content %}
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi {% if branch %}bi-pencil-square{% else %}bi-plus-circle{% endif %} gold-accent"></i>
+            {% if branch %}Edit: {{ branch.name_en }}{% else %}Create New Branch{% endif %}
+        </h4>
+        <a href="{% url 'website:admin_branches' %}" class="btn btn-outline-gold">
+            <i class="bi bi-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="branchForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        {% if branch %}
+        <div class="alert {% if branch.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if branch.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Branch Status:</strong> 
+                {% if branch.is_active %}
+                    <span class="badge bg-success">Active</span> - Visible on website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Hidden from website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Created: {{ branch.created_at|date:"M d, Y" }} | Last updated: {{ branch.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+        {% endif %}
+
+        <!-- Main Branch Warning -->
+        {% if branch and branch.is_main %}
+        <div class="alert alert-warning mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Main Branch</strong> - This is the main branch. There can only be one main branch.
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Left Column - Main Branch Fields -->
+            <div class="col-md-8">
+                <!-- Active Status and Order Fields from BaseModel -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                                    <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                                    <span id="activeStatusText">
+                                        {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                                    </span>
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                            {{ form.order }}
+                            {% if form.order.help_text %}
+                            <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branch Type Flags -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check">
+                                {{ form.is_main }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_main.id_for_label }}">
+                                    <i class="bi bi-star-fill text-warning me-2"></i>Main Branch
+                                </label>
+                            </div>
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>Only one branch can be the main branch. Setting this will unset other main branches.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="border rounded-4 p-4 bg-light">
+                            <div class="form-check">
+                                {{ form.is_coming_soon }}
+                                <label class="form-check-label fw-semibold ms-2" for="{{ form.is_coming_soon.id_for_label }}">
+                                    <i class="bi bi-clock text-info me-2"></i>Coming Soon
+                                </label>
+                            </div>
+                            <div class="form-text text-muted mt-2">
+                                <i class="bi bi-info-circle me-1"></i>Mark if this branch is not yet open
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branch Names -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-building me-1 gold-accent"></i>Branch Name (English) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name_en }}
+                        {% if form.name_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.name_en.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-building me-1 gold-accent"></i>Branch Name (Swahili) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name_sw }}
+                        {% if form.name_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.name_sw.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Addresses -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-pin-map me-1 gold-accent"></i>Address (English) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.address_en }}
+                    {% if form.address_en.errors %}
+                        <div class="text-danger small mt-1">{{ form.address_en.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-pin-map me-1 gold-accent"></i>Address (Swahili) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.address_sw }}
+                    {% if form.address_sw.errors %}
+                        <div class="text-danger small mt-1">{{ form.address_sw.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Contact Info -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-envelope me-1 gold-accent"></i>Postal Box
+                        </label>
+                        {{ form.postal_box }}
+                        {% if form.postal_box.errors %}
+                            <div class="text-danger small mt-1">{{ form.postal_box.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Optional: P.O. Box address</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-phone me-1 gold-accent"></i>Phone Number
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Optional: Branch contact number</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Map Coordinates -->
+            <div class="col-md-4">
+                <!-- Coordinates Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-geo-alt me-2 gold-accent"></i>Map Coordinates
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Latitude</label>
+                            {{ form.latitude }}
+                            {% if form.latitude.errors %}
+                                <div class="text-danger small mt-1">{{ form.latitude.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">e.g., -6.163315</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Longitude</label>
+                            {{ form.longitude }}
+                            {% if form.longitude.errors %}
+                                <div class="text-danger small mt-1">{{ form.longitude.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">e.g., 35.738726</div>
+                        </div>
+
+                        {% if branch.latitude and branch.longitude %}
+                        <div class="bg-light rounded-3 p-2 mt-3 text-center">
+                            <small>
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                Coordinates set
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-gold" id="getCurrentLocation">
+                                <i class="bi bi-crosshair me-1"></i>Get Current Location
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-gold" id="openInGoogleMaps">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>Open in Google Maps
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branch Info Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title fw-semibold mb-3">
+                            <i class="bi bi-info-circle me-2 gold-accent"></i>Branch Information
+                        </h6>
+                        
+                        {% if branch %}
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Branch ID</small>
+                            <span class="badge bg-light text-dark">{{ branch.id }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Location Status</small>
+                            {% if branch.location_details %}
+                                <span class="badge bg-success">Has Location</span>
+                            {% else %}
+                                <span class="badge bg-warning">No Location</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted small mb-0">Fill in the branch details and save to create a new branch.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4 mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Copy English content to Swahili fields to get started.</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-gold" id="copyToSwahili">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Copy to Swahili
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <div>
+                {% if branch and not branch.is_main %}
+                <button type="button" class="btn btn-outline-danger" 
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash me-2"></i>Delete Branch
+                </button>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'website:admin_branches' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-gold">
+                    <i class="bi bi-save me-2"></i>
+                    {% if branch %}Update{% else %}Create{% endif %} Branch
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Preview Card -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>How It Will Appear</h5>
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-flag me-2 gold-accent"></i>English Version</h6>
+                <div class="bg-light p-3 rounded-3" id="previewEnglish">
+                    <p class="mb-1"><strong>{{ form.name_en.value|default:'Branch Name' }}</strong></p>
+                    <p class="mb-1 small">{{ form.address_en.value|default:'Branch address will appear here...' }}</p>
+                    {% if form.postal_box.value %}
+                        <p class="mb-1 small">{{ form.postal_box.value }}</p>
+                    {% endif %}
+                    {% if form.phone.value %}
+                        <p class="mb-0 small">{{ form.phone.value }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-flag me-2 gold-accent"></i>Swahili Version</h6>
+                <div class="bg-light p-3 rounded-3" id="previewSwahili">
+                    <p class="mb-1"><strong>{{ form.name_sw.value|default:'Jina la Tawi' }}</strong></p>
+                    <p class="mb-1 small">{{ form.address_sw.value|default:'Anwani ya tawi itaonekana hapa...' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Delete Modal -->
+{% if branch and not branch.is_main %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the branch "<strong>{{ branch.name_en }}</strong>"?</p>
+                <p class="text-danger small"><i class="bi bi-info-circle me-1"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'website:admin_branch_delete' branch.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Branch</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle icon and text when checkbox changes
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Live preview updates
+    $('#id_name_en, #id_address_en, #id_postal_box, #id_phone').on('input', function() {
+        updateEnglishPreview();
+    });
+
+    $('#id_name_sw, #id_address_sw').on('input', function() {
+        updateSwahiliPreview();
+    });
+
+    function updateEnglishPreview() {
+        var name = $('#id_name_en').val();
+        var address = $('#id_address_en').val();
+        var postal = $('#id_postal_box').val();
+        var phone = $('#id_phone').val();
+        
+        var preview = '<p class="mb-1"><strong>' + (name || 'Branch Name') + '</strong></p>';
+        preview += '<p class="mb-1 small">' + (address || 'Branch address will appear here...') + '</p>';
+        if (postal) {
+            preview += '<p class="mb-1 small">' + postal + '</p>';
+        }
+        if (phone) {
+            preview += '<p class="mb-0 small">' + phone + '</p>';
+        }
+        $('#previewEnglish').html(preview);
+    }
+
+    function updateSwahiliPreview() {
+        var name = $('#id_name_sw').val();
+        var address = $('#id_address_sw').val();
+        
+        var preview = '<p class="mb-1"><strong>' + (name || 'Jina la Tawi') + '</strong></p>';
+        preview += '<p class="mb-0 small">' + (address || 'Anwani ya tawi itaonekana hapa...') + '</p>';
+        $('#previewSwahili').html(preview);
+    }
+
+    // Copy English to Swahili
+    $('#copyToSwahili').click(function() {
+        var enName = $('#id_name_en').val();
+        var enAddress = $('#id_address_en').val();
+        
+        if (enName && !$('#id_name_sw').val()) {
+            $('#id_name_sw').val(enName);
+        }
+        
+        if (enAddress && !$('#id_address_sw').val()) {
+            $('#id_address_sw').val(enAddress);
+        }
+        
+        updateSwahiliPreview();
+        toastr.success('Copied to Swahili fields!');
+    });
+
+    // Get current location
+    $('#getCurrentLocation').click(function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                $('#id_latitude').val(position.coords.latitude);
+                $('#id_longitude').val(position.coords.longitude);
+                toastr.success('Location coordinates captured!');
+            }, function() {
+                toastr.error('Unable to get your location');
+            });
+        } else {
+            toastr.error('Geolocation is not supported by your browser');
+        }
+    });
+
+    // Open in Google Maps
+    $('#openInGoogleMaps').click(function() {
+        var lat = $('#id_latitude').val();
+        var lng = $('#id_longitude').val();
+        
+        if (lat && lng) {
+            window.open('https://www.google.com/maps?q=' + lat + ',' + lng, '_blank');
+        } else {
+            var address = $('#id_address_en').val();
+            if (address) {
+                var query = encodeURIComponent(address + ', Dodoma, Tanzania');
+                window.open('https://www.google.com/maps/search/?api=1&query=' + query, '_blank');
+            } else {
+                toastr.warning('Please add an address or coordinates first');
+            }
+        }
+    });
+
+    // Warn if setting as main branch
+    $('#{{ form.is_main.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            if (!confirm('Setting this as the main branch will remove main branch status from others. Continue?')) {
+                $(this).prop('checked', false);
+            }
+        }
+    });
+
+    // Form validation
+    $('#branchForm').submit(function(e) {
+        var isValid = true;
+        
+        if (!$('#id_name_en').val().trim()) {
+            toastr.error('Branch name in English is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_name_sw').val().trim()) {
+            toastr.error('Branch name in Swahili is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_address_en').val().trim()) {
+            toastr.error('Address in English is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_address_sw').val().trim()) {
+            toastr.error('Address in Swahili is required');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}

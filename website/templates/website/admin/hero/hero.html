@@ -1,0 +1,592 @@
+<!-- website/templates/website/admin/hero/hero.html -->
+{% extends 'website/admin/admin_panel.html' %}
+{% load static %}
+
+{% block title %}Hero Section - Kalton Investment Admin{% endblock %}
+
+{% block header_title %}Hero Section Management{% endblock %}
+
+{% block content %}
+<!-- STAT CARDS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-megaphone"></i></div>
+            <div>
+                <small class="text-muted">Tagline</small>
+                <h3 class="mb-0 fw-bold">{{ hero.tagline_en|truncatechars:20 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-type-h1"></i></div>
+            <div>
+                <small class="text-muted">Heading</small>
+                <h3 class="mb-0 fw-bold">{{ hero.heading_en|truncatechars:20 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-calendar-check"></i></div>
+            <div>
+                <small class="text-muted">Established</small>
+                <h3 class="mb-0 fw-bold">{{ hero.registration_text_en|truncatechars:15 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center">
+            <div class="stat-icon me-3"><i class="bi bi-translate"></i></div>
+            <div>
+                <small class="text-muted">Languages</small>
+                <h3 class="mb-0 fw-bold">EN / SW</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN HERO FORM -->
+<section class="section-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-house-door gold-accent"></i> Hero Section Content
+        </h4>
+        <button type="submit" form="heroForm" class="btn btn-gold">
+            <i class="bi bi-save me-2"></i>Save Changes
+        </button>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <form method="POST" id="heroForm">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Bar -->
+        <div class="alert {% if hero.is_active %}alert-success{% else %}alert-secondary{% endif %} mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi {% if hero.is_active %}bi-check-circle-fill{% else %}bi-pause-circle-fill{% endif %} me-2"></i>
+                <strong>Hero Section Status:</strong> 
+                {% if hero.is_active %}
+                    <span class="badge bg-success">Active</span> - Hero section is visible on the website
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span> - Hero section is hidden from the website
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                Last updated: {{ hero.updated_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+
+        <!-- Active Status and Order Fields from BaseModel -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <div class="form-check form-switch">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-semibold ms-2" for="{{ form.is_active.id_for_label }}">
+                            <i class="bi {% if form.is_active.value %}bi-toggle-on text-success{% else %}bi-toggle-off text-secondary{% endif %} me-2" id="activeToggleIcon"></i>
+                            <span id="activeStatusText">
+                                {% if form.is_active.value %}Active - Visible on website{% else %}Inactive - Hidden from website{% endif %}
+                            </span>
+                        </label>
+                    </div>
+                    {% if form.is_active.help_text %}
+                    <div class="form-text text-muted mt-2">
+                        <i class="bi bi-info-circle me-1"></i>{{ form.is_active.help_text }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 bg-light">
+                    <label class="form-label fw-semibold">{{ form.order.label }}</label>
+                    {{ form.order }}
+                    {% if form.order.help_text %}
+                    <div class="form-text text-muted mt-1">{{ form.order.help_text }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - English Version -->
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 h-100">
+                    <h5 class="mb-4">
+                        <i class="bi bi-flag me-2 gold-accent"></i>English Version
+                    </h5>
+                    
+                    <!-- Tagline -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-megaphone me-1 gold-accent"></i>Tagline (English)
+                        </label>
+                        {{ form.tagline_en }}
+                        {% if form.tagline_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.tagline_en.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="enTaglineCount">0/200</span>
+                        </div>
+                    </div>
+
+                    <!-- Heading -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-type-h1 me-1 gold-accent"></i>Main Heading (English) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.heading_en }}
+                        {% if form.heading_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.heading_en.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="enHeadingCount">0/200</span>
+                        </div>
+                    </div>
+
+                    <!-- Subheading -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-text-paragraph me-1 gold-accent"></i>Subheading (English) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.subheading_en }}
+                        {% if form.subheading_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.subheading_en.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="enSubheadingCount">0/500</span>
+                        </div>
+                    </div>
+
+                    <!-- Registration Text -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-calendar-check me-1 gold-accent"></i>Registration Text (English)
+                        </label>
+                        {{ form.registration_text_en }}
+                        {% if form.registration_text_en.errors %}
+                            <div class="text-danger small mt-1">{{ form.registration_text_en.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="enRegCount">0/100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Swahili Version -->
+            <div class="col-md-6">
+                <div class="border rounded-4 p-4 h-100">
+                    <h5 class="mb-4">
+                        <i class="bi bi-flag me-2 gold-accent"></i>Swahili Version
+                    </h5>
+                    
+                    <!-- Tagline -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-megaphone me-1 gold-accent"></i>Tagline (Swahili)
+                        </label>
+                        {{ form.tagline_sw }}
+                        {% if form.tagline_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.tagline_sw.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="swTaglineCount">0/200</span>
+                        </div>
+                    </div>
+
+                    <!-- Heading -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-type-h1 me-1 gold-accent"></i>Main Heading (Swahili) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.heading_sw }}
+                        {% if form.heading_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.heading_sw.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="swHeadingCount">0/200</span>
+                        </div>
+                    </div>
+
+                    <!-- Subheading -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-text-paragraph me-1 gold-accent"></i>Subheading (Swahili) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.subheading_sw }}
+                        {% if form.subheading_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.subheading_sw.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="swSubheadingCount">0/500</span>
+                        </div>
+                    </div>
+
+                    <!-- Registration Text -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-calendar-check me-1 gold-accent"></i>Registration Text (Swahili)
+                        </label>
+                        {{ form.registration_text_sw }}
+                        {% if form.registration_text_sw.errors %}
+                            <div class="text-danger small mt-1">{{ form.registration_text_sw.errors }}</div>
+                        {% endif %}
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="badge bg-light text-dark" id="swRegCount">0/100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Helper -->
+        <div class="alert alert-info bg-light border-0 rounded-4 mb-4 mt-4">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-translate fs-3 gold-accent"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-semibold mb-1">Translation Helper</h6>
+                    <p class="small mb-2">Copy English content to Swahili fields to get started.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyTagline">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Tagline
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyHeading">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Heading
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copySubheading">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Subheading
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-gold" id="copyReg">
+                        <i class="bi bi-arrow-right-circle me-1"></i>Copy Registration
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end pt-3 border-top">
+            <button type="submit" class="btn btn-gold">
+                <i class="bi bi-save me-2"></i>Save All Changes
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- LIVE PREVIEW SECTION -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-eye-fill me-2 gold-accent"></i>Live Preview (How it looks on website)</h5>
+    
+    <div class="row g-4">
+        <!-- English Preview -->
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+                <div class="text-center text-white">
+                    <span class="badge bg-gold text-dark mb-3" id="previewTaglineEn">{{ hero.tagline_en|default:"Trusted Banking & Mobile Money Agent" }}</span>
+                    <h1 class="display-5 fw-bold mb-3" id="previewHeadingEn">{{ hero.heading_en|default:"Your Trusted Mobile Money & Banking Agent" }}</h1>
+                    <p class="lead mb-4" id="previewSubheadingEn">{{ hero.subheading_en|default:"Fast, secure & reliable financial services in Dodoma." }}</p>
+                    <p class="small opacity-75" id="previewRegEn">{{ hero.registration_text_en|default:"Reg: 17th May 2022" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Swahili Preview -->
+        <div class="col-md-6">
+            <div class="border rounded-4 p-4" style="background: linear-gradient(135deg, #0b1423 0%, #1a2942 100%);">
+                <div class="text-center text-white">
+                    <span class="badge bg-gold text-dark mb-3" id="previewTaglineSw">{{ hero.tagline_sw|default:"Wakala wa Benki na Pesa kwa Simu" }}</span>
+                    <h1 class="display-5 fw-bold mb-3" id="previewHeadingSw">{{ hero.heading_sw|default:"Wakala Wako wa Pesa kwa Simu na Benki Anayeaminika" }}</h1>
+                    <p class="lead mb-4" id="previewSubheadingSw">{{ hero.subheading_sw|default:"Huduma za kifedha za haraka, salama na za kuaminika Dodoma." }}</p>
+                    <p class="small opacity-75" id="previewRegSw">{{ hero.registration_text_sw|default:"Sajili: 17 Mei 2022" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop/Mobile Preview Toggle -->
+    <div class="d-flex justify-content-center gap-3 mt-4">
+        <button type="button" class="btn btn-sm btn-outline-gold active" id="desktopPreview">
+            <i class="bi bi-pc-display me-1"></i>Desktop
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-gold" id="mobilePreview">
+            <i class="bi bi-phone me-1"></i>Mobile
+        </button>
+    </div>
+</section>
+
+<!-- Character Count Summary -->
+<section class="section-card mt-4">
+    <h5 class="mb-3"><i class="bi bi-bar-chart me-2 gold-accent"></i>Content Summary</h5>
+    
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="bg-light p-3 rounded-4 text-center">
+                <h6>Tagline</h6>
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-gold" role="progressbar" id="taglineProgress" style="width: 0%"></div>
+                </div>
+                <small class="text-muted" id="taglineStatus">0/200</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="bg-light p-3 rounded-4 text-center">
+                <h6>Heading</h6>
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-gold" role="progressbar" id="headingProgress" style="width: 0%"></div>
+                </div>
+                <small class="text-muted" id="headingStatus">0/200</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="bg-light p-3 rounded-4 text-center">
+                <h6>Subheading</h6>
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-gold" role="progressbar" id="subheadingProgress" style="width: 0%"></div>
+                </div>
+                <small class="text-muted" id="subheadingStatus">0/500</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="bg-light p-3 rounded-4 text-center">
+                <h6>Registration</h6>
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-gold" role="progressbar" id="regProgress" style="width: 0%"></div>
+                </div>
+                <small class="text-muted" id="regStatus">0/100</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.bg-gold {
+    background-color: #f5b342 !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Character counters with max length
+    function updateCharCount(field, counterId, maxLength, progressId, statusId) {
+        $(field).on('input', function() {
+            var count = $(this).val().length;
+            var percentage = (count / maxLength) * 100;
+            
+            $(counterId).text(count + '/' + maxLength);
+            
+            // Update progress bar
+            $(progressId).css('width', percentage + '%');
+            $(statusId).text(count + '/' + maxLength);
+            
+            if (count > maxLength) {
+                $(counterId).addClass('bg-danger text-white');
+                $(progressId).addClass('bg-danger');
+            } else {
+                $(counterId).removeClass('bg-danger text-white');
+                $(progressId).removeClass('bg-danger');
+            }
+        });
+        
+        // Initial count
+        var initialCount = $(field).val().length;
+        var initialPercentage = (initialCount / maxLength) * 100;
+        $(counterId).text(initialCount + '/' + maxLength);
+        $(progressId).css('width', initialPercentage + '%');
+        $(statusId).text(initialCount + '/' + maxLength);
+    }
+
+    // Initialize all character counters
+    updateCharCount('#id_tagline_en', '#enTaglineCount', 200, '#taglineProgress', '#taglineStatus');
+    updateCharCount('#id_tagline_sw', '#swTaglineCount', 200, '#taglineProgress', '#taglineStatus');
+    updateCharCount('#id_heading_en', '#enHeadingCount', 200, '#headingProgress', '#headingStatus');
+    updateCharCount('#id_heading_sw', '#swHeadingCount', 200, '#headingProgress', '#headingStatus');
+    updateCharCount('#id_subheading_en', '#enSubheadingCount', 500, '#subheadingProgress', '#subheadingStatus');
+    updateCharCount('#id_subheading_sw', '#swSubheadingCount', 500, '#subheadingProgress', '#subheadingStatus');
+    updateCharCount('#id_registration_text_en', '#enRegCount', 100, '#regProgress', '#regStatus');
+    updateCharCount('#id_registration_text_sw', '#swRegCount', 100, '#regProgress', '#regStatus');
+
+    // Toggle icon and text when checkbox changes
+    $('#{{ form.is_active.id_for_label }}').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#activeToggleIcon').removeClass('bi-toggle-off text-secondary').addClass('bi-toggle-on text-success');
+            $('#activeStatusText').text('Active - Visible on website');
+        } else {
+            $('#activeToggleIcon').removeClass('bi-toggle-on text-success').addClass('bi-toggle-off text-secondary');
+            $('#activeStatusText').text('Inactive - Hidden from website');
+        }
+    });
+
+    // Live preview updates - English
+    $('#id_tagline_en').on('input', function() {
+        $('#previewTaglineEn').text($(this).val() || 'Trusted Banking & Mobile Money Agent');
+    });
+
+    $('#id_heading_en').on('input', function() {
+        $('#previewHeadingEn').text($(this).val() || 'Your Trusted Mobile Money & Banking Agent');
+    });
+
+    $('#id_subheading_en').on('input', function() {
+        $('#previewSubheadingEn').text($(this).val() || 'Fast, secure & reliable financial services in Dodoma.');
+    });
+
+    $('#id_registration_text_en').on('input', function() {
+        $('#previewRegEn').text($(this).val() || 'Reg: 17th May 2022');
+    });
+
+    // Live preview updates - Swahili
+    $('#id_tagline_sw').on('input', function() {
+        $('#previewTaglineSw').text($(this).val() || 'Wakala wa Benki na Pesa kwa Simu');
+    });
+
+    $('#id_heading_sw').on('input', function() {
+        $('#previewHeadingSw').text($(this).val() || 'Wakala Wako wa Pesa kwa Simu na Benki Anayeaminika');
+    });
+
+    $('#id_subheading_sw').on('input', function() {
+        $('#previewSubheadingSw').text($(this).val() || 'Huduma za kifedha za haraka, salama na za kuaminika Dodoma.');
+    });
+
+    $('#id_registration_text_sw').on('input', function() {
+        $('#previewRegSw').text($(this).val() || 'Sajili: 17 Mei 2022');
+    });
+
+    // Translation helper functions
+    $('#copyTagline').click(function() {
+        var enValue = $('#id_tagline_en').val();
+        if (enValue && !$('#id_tagline_sw').val()) {
+            $('#id_tagline_sw').val(enValue);
+            $('#id_tagline_sw').trigger('input');
+            toastr.success('Tagline copied to Swahili!');
+        } else if (!enValue) {
+            toastr.warning('Please enter English tagline first');
+        } else {
+            toastr.warning('Swahili tagline field is not empty');
+        }
+    });
+
+    $('#copyHeading').click(function() {
+        var enValue = $('#id_heading_en').val();
+        if (enValue && !$('#id_heading_sw').val()) {
+            $('#id_heading_sw').val(enValue);
+            $('#id_heading_sw').trigger('input');
+            toastr.success('Heading copied to Swahili!');
+        } else if (!enValue) {
+            toastr.warning('Please enter English heading first');
+        } else {
+            toastr.warning('Swahili heading field is not empty');
+        }
+    });
+
+    $('#copySubheading').click(function() {
+        var enValue = $('#id_subheading_en').val();
+        if (enValue && !$('#id_subheading_sw').val()) {
+            $('#id_subheading_sw').val(enValue);
+            $('#id_subheading_sw').trigger('input');
+            toastr.success('Subheading copied to Swahili!');
+        } else if (!enValue) {
+            toastr.warning('Please enter English subheading first');
+        } else {
+            toastr.warning('Swahili subheading field is not empty');
+        }
+    });
+
+    $('#copyReg').click(function() {
+        var enValue = $('#id_registration_text_en').val();
+        if (enValue && !$('#id_registration_text_sw').val()) {
+            $('#id_registration_text_sw').val(enValue);
+            $('#id_registration_text_sw').trigger('input');
+            toastr.success('Registration text copied to Swahili!');
+        } else if (!enValue) {
+            toastr.warning('Please enter English registration text first');
+        } else {
+            toastr.warning('Swahili registration field is not empty');
+        }
+    });
+
+    // Desktop/Mobile preview toggle
+    $('#desktopPreview').click(function() {
+        $(this).addClass('active');
+        $('#mobilePreview').removeClass('active');
+        $('.display-5').removeClass('fs-4').addClass('display-5');
+    });
+
+    $('#mobilePreview').click(function() {
+        $(this).addClass('active');
+        $('#desktopPreview').removeClass('active');
+        $('.display-5').removeClass('display-5').addClass('fs-4');
+    });
+
+    // Form validation
+    $('#heroForm').submit(function(e) {
+        var isValid = true;
+        
+        // Check required fields
+        if (!$('#id_heading_en').val().trim()) {
+            toastr.error('English heading is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_heading_sw').val().trim()) {
+            toastr.error('Swahili heading is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_subheading_en').val().trim()) {
+            toastr.error('English subheading is required');
+            isValid = false;
+        }
+        
+        if (!$('#id_subheading_sw').val().trim()) {
+            toastr.error('Swahili subheading is required');
+            isValid = false;
+        }
+        
+        // Check character limits
+        if ($('#id_heading_en').val().length > 200) {
+            toastr.error('English heading exceeds 200 characters');
+            isValid = false;
+        }
+        
+        if ($('#id_heading_sw').val().length > 200) {
+            toastr.error('Swahili heading exceeds 200 characters');
+            isValid = false;
+        }
+        
+        if ($('#id_subheading_en').val().length > 500) {
+            toastr.error('English subheading exceeds 500 characters');
+            isValid = false;
+        }
+        
+        if ($('#id_subheading_sw').val().length > 500) {
+            toastr.error('Swahili subheading exceeds 500 characters');
+            isValid = false;
+        }
+        
+        return isValid;
+    });
+});
+</script>
+{% endblock %}
