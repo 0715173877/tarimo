@@ -68,19 +68,41 @@ TEMPLATES = [
 WSGI_APPLICATION = 'kalton_project.wsgi.application'
 
 # Database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     },
+
+#     'dashboard': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': '',  # Same database as default
+#         'USER': '',  # You can use same user or create a read-only user
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#         'OPTIONS': {
+#             'options': '-c default_transaction_read_only=on'  # Extra safety - prevents writes
+#         },
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER',),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST',),
+        'PORT': os.environ.get('DB_PORT',),
     },
-
     'dashboard': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '',  # Same database as default
-        'USER': '',  # You can use same user or create a read-only user
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER',),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST',),
+        'PORT': os.environ.get('DB_PORT',),
         'OPTIONS': {
             'options': '-c default_transaction_read_only=on'  # Extra safety - prevents writes
         },
