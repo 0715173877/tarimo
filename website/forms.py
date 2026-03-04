@@ -254,26 +254,3 @@ class PromoBlockForm(BaseModelFormMixin, forms.ModelForm):
             'text_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
             'accent_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
         }
-
-
-
-
-# postgres=# CREATE DATABASE kalton_investment_db;
-# CREATE DATABASE
-# postgres=# \l;
-# invalid command \l;
-# Try \? for help.
-# postgres=# l\
-# invalid command \
-# Try \? for help.
-# postgres-# CREATE USER kalton_user WITH PASSWORD 'kalton@321';
-# ERROR:  syntax error at or near "l"
-# LINE 1: l
-#         ^
-# postgres=# CREATE USER kalton_user WITH PASSWORD 'kalton@321';
-# CREATE ROLE
-# postgres=# GRANT ALL PRIVILEGES ON DATABASE kalton_investment_db TO kalton_user;
-# GRANT
-# postgres=# ALTER USER kalton_user CREATEDB;
-# ALTER ROLE
-# postgres=# \q
