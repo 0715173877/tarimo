@@ -16,7 +16,6 @@ from .forms import *
 
 # Public views
 def home(request):
-    """Homepage view with all content"""
     context = {
         'hero': HeroSection.objects.first(),
         'contact': ContactInfo.objects.first(),
